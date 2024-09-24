@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Travel Route Planner</title>
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400&display=swap" rel="stylesheet">
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .transition-transform {
@@ -136,13 +137,27 @@
             <span class="mr-2 text-[#cca385] arrow">&#9654;</span>
             Dropdown 3
           </button>
+          
           <div id="dropdown3" class="hidden pl-4">
-            <p class="text-gray-600 dropdown-text">Option 1</p>
-            <p class="text-gray-600 dropdown-text">Option 2</p>
-            <p class="text-gray-600 dropdown-text">Option 3</p>
+            <!-- Title Input Box -->
+            <div class="mt-2 mb-4">
+              <label for="titleInput" class="dropdown-text text-gray-600">Title:</label>
+              <input type="text" id="titleInput" placeholder="Enter a title" class="border p-2 rounded w-full mt-1">
+            </div>
+            
+            <!-- Text Message Box -->
+            <div class="mt-4 mb-4">
+              <label for="messageInput" class="dropdown-text text-gray-600">Text:</label>
+              <textarea id="messageInput" placeholder="Enter your text" class="border p-2 rounded w-full mt-1" rows="4"></textarea>
+            </div>
+            
+            <!-- Sub-Text Message Box -->
+            <div class="mt-4 mb-4">
+              <label for="subTextInput" class="dropdown-text text-gray-600">Sub-Text:</label>
+              <textarea id="subTextInput" placeholder="Enter your sub-text" class="border p-2 rounded w-full mt-1" rows="3"></textarea>
+            </div>
           </div>
         </div>
-
         <div class="dropdown">
           <button class="w-full text-left bg-[#f9f9f9] p-3 rounded-lg hover:bg-[#e5e5e5] focus:outline-none flex items-center dropdown-text" onclick="toggleDropdown('dropdown4', this)">
             <span class="mr-2 text-[#cca385] arrow">&#9654;</span>
