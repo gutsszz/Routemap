@@ -46,6 +46,36 @@
   background: #b59c74; /* Darker shade on hover */
 }
 
+#mapContainer {
+    width: 50%;
+    aspect-ratio: 4 / 3;
+  }
+
+  /* Media query for smaller screens */
+  @media (max-width: 768px) {
+    /* Make sidebar cover the entire screen */
+    #sidebar {
+      width: 100%;
+      height: 100%;
+      z-index: 10; /* Sidebar is below the preview map */
+    }
+
+    /* Hide large map and show preview on top of sidebar */
+    #mapWrapper {
+      display: none;
+    }
+
+    #previewContainer {
+      display: block;
+      width: 90vw;
+      height: 60vw; /* Maintain 4:3 aspect ratio */
+      top: 60%; /* Adjust the position slightly */
+      left: 5%;
+      right: 5%;
+      z-index: 50; /* Higher than the sidebar */
+    }
+  }
+
   </style>
 </head>
 <body class="bg-gray-100">
@@ -57,7 +87,7 @@
   </div>
 
   <!-- Main Content -->
-  <div class="flex pt-16">
+  <div class="flex pt-16 h-screen">
     
     <!-- Sliding Bar -->
     <div id="sidebar" class="w-80 h-screen bg-white shadow-md p-4 transition-transform -translate-x-full fixed z-20">
@@ -157,18 +187,23 @@
       </div>
     </div>
 
- <!-- Map Area (Placeholder for Mapbox) -->
-<div class="flex-1 bg-gray-200 ml-64 h-screen relative flex items-center justify-center">
-  <div id="mapContainer" class="border-4 border-black" style="width: 75%; aspect-ratio: 4 / 3;">
-    <div class="flex items-center justify-center w-full h-full text-gray-500">
-      Map will appear here
+   <!-- Map Area -->
+   <div id="mapWrapper" class="flex-1 bg-gray-200 ml-64 relative">
+    <div id="mapContainer" class="border-4 border-black absolute top-0 bottom-0 left-0 right-0 m-auto" style="width: 50%; aspect-ratio: 4 / 3;">
+      <div class="flex items-center justify-center w-full h-full text-gray-500">
+        Map will appear here
+      </div>
     </div>
   </div>
 </div>
 
-
-
+<!-- Preview Container for smaller screens -->
+<div id="previewContainer" class="hidden bg-gray-300 border-4 border-black fixed p-4 rounded-lg" style="z-index: 50;">
+  <div class="flex items-center justify-center w-full h-full text-gray-500">
+    Map preview will appear here
   </div>
+</div>
+  
 
   <script>
     // Toggling the sidebar
