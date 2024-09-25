@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Travel Route Planner</title>
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400&display=swap" rel="stylesheet">
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.js"></script>
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .transition-transform {
@@ -46,36 +49,32 @@
   background: #b59c74; /* Darker shade on hover */
 }
 
-#mapContainer {
-    width: 50%;
-    aspect-ratio: 4 / 3;
-  }
+
 
   /* Media query for smaller screens */
   @media (max-width: 768px) {
-    /* Make sidebar cover the entire screen */
-    #sidebar {
-      width: 100%;
-      height: 100%;
-      z-index: 10; /* Sidebar is below the preview map */
-    }
+      /* Make sidebar cover the entire screen */
+      #sidebar {
+        width: 100%;
+        height: 100%;
+        z-index: 10;
+      }
 
-    /* Hide large map and show preview on top of sidebar */
-    #mapWrapper {
-      display: none;
-    }
+      /* Hide large map and show preview on top of sidebar */
+      #mapWrapper {
+        display: none;
+      }
 
-    #previewContainer {
-      display: block;
-      width: 90vw;
-      height: 60vw; /* Maintain 4:3 aspect ratio */
-      top: 60%; /* Adjust the position slightly */
-      left: 5%;
-      right: 5%;
-      z-index: 50; /* Higher than the sidebar */
+      #previewContainer {
+        display: block;
+        width: 80vw;
+        height: 60vw;
+        top: 70%;
+        left: 15%;
+        right: 5%;
+        z-index: 50;
+      }
     }
-  }
-
   </style>
 </head>
 <body class="bg-gray-100">
@@ -83,14 +82,14 @@
   <!-- Top Bar -->
   <div class="w-full bg-white h-16 flex items-center justify-between px-4 shadow-lg z-10 fixed top-0">
     <button id="toggleSidebar" class="text-[#cca385] text-2xl">&#9776;</button>
-    <div class="text-2xl font-semibold text-[#cca385]">Travel Route Planner</div>
+    <div class="text-2xl font-semibold text-[#cca385]">Route Map</div>
   </div>
 
   <!-- Main Content -->
   <div class="flex pt-16 h-screen">
     
     <!-- Sliding Bar -->
-    <div id="sidebar" class="w-80 h-screen bg-white shadow-md p-4 transition-transform -translate-x-full fixed z-20">
+    <div id="sidebar" class="w-80 h-screen bg-white shadow-md p-4  fixed z-20">
       <h2 class="text-xl font-semibold text-[#cca385] mb-4">Options</h2>
       
       
@@ -108,7 +107,7 @@
               <!-- First input row -->
               <div class="flex items-center space-x-2">
                 <span class="dropdown-text">1.</span>
-                <input type="text" placeholder="Enter coordinates (lat,lng)" class="border p-2 rounded w-60 ml-2" id="coordinatesInput1">
+                <input type="text" placeholder="Enter place" class="border p-2 rounded w-full ml-2" id="coordinatesInput1">
                 <span class="remove-btn" onclick="removeLocation(this)">&#10005;</span>
               </div>
             </div>
@@ -164,15 +163,29 @@
         <div class="dropdown border-b border-gray-200">
           <button class="w-full text-left bg-[#f9f9f9] p-3 rounded-lg hover:bg-[#e5e5e5] focus:outline-none flex items-center dropdown-text" onclick="toggleDropdown('dropdown3', this)">
             <span class="mr-2 text-[#cca385] arrow">&#9654;</span>
-            Dropdown 3
+            Text 
           </button>
+          
           <div id="dropdown3" class="hidden pl-4">
-            <p class="text-gray-600 dropdown-text">Option 1</p>
-            <p class="text-gray-600 dropdown-text">Option 2</p>
-            <p class="text-gray-600 dropdown-text">Option 3</p>
+            <!-- Title Input Box -->
+            <div class="mt-2 mb-4">
+              <label for="titleInput" class="dropdown-text text-gray-600">Title:</label>
+              <input type="text" id="titleInput" placeholder="Enter a title" class="border p-2 rounded w-full mt-1">
+            </div>
+            
+            <!-- Text Message Box -->
+            <div class="mt-4 mb-4">
+              <label for="messageInput" class="dropdown-text text-gray-600">Text:</label>
+              <textarea id="messageInput" placeholder="Enter your text" class="border p-2 rounded w-full mt-1" rows="4"></textarea>
+            </div>
+            
+            <!-- Sub-Text Message Box -->
+            <div class="mt-4 mb-4">
+              <label for="subTextInput" class="dropdown-text text-gray-600">Sub-Text:</label>
+              <textarea id="subTextInput" placeholder="Enter your sub-text" class="border p-2 rounded w-full mt-1" rows="3"></textarea>
+            </div>
           </div>
         </div>
-
         <div class="dropdown">
           <button class="w-full text-left bg-[#f9f9f9] p-3 rounded-lg hover:bg-[#e5e5e5] focus:outline-none flex items-center dropdown-text" onclick="toggleDropdown('dropdown4', this)">
             <span class="mr-2 text-[#cca385] arrow">&#9654;</span>
@@ -187,25 +200,70 @@
       </div>
     </div>
 
-   <!-- Map Area -->
-   <div id="mapWrapper" class="flex-1 bg-gray-200 ml-64 relative">
-    <div id="mapContainer" class="border-4 border-black absolute top-0 bottom-0 left-0 right-0 m-auto" style="width: 50%; aspect-ratio: 4 / 3;">
-      <div class="flex items-center justify-center w-full h-full text-gray-500">
-        Map will appear here
+    <div id="mapWrapper" class="flex-1 bg-gray-200 ml-64 relative">
+      <div id="mapContainer" class="absolute top-0 bottom-0 left-0 right-0 m-auto" style="width: 60%; aspect-ratio: 4 / 3; background-color: white; box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2); z-index: 10;">
+        <div id="map" class="flex items-center justify-center w-full h-full text-gray-500">
+          <!-- Map will appear here -->
+        </div>
       </div>
     </div>
+
+ <!-- Preview Container for smaller screens -->
+<div id="previewContainer" class="hidden bg-white fixed p-4 shadow-xl" style="z-index: 50;">
+  <!-- Semi-transparent background -->
+  <div class="absolute inset-0 bg-white opacity-80"></div>
+  
+  <!-- Map content above the background -->
+  <div id="previewMap" class="relative flex items-center justify-center w-full h-full text-gray-500">
+    
   </div>
 </div>
 
-<!-- Preview Container for smaller screens -->
-<div id="previewContainer" class="hidden bg-gray-300 border-4 border-black fixed p-4 rounded-lg" style="z-index: 50;">
-  <div class="flex items-center justify-center w-full h-full text-gray-500">
-    Map preview will appear here
-  </div>
 </div>
   
 
   <script>
+
+mapboxgl.accessToken = 'pk.eyJ1IjoidGFsaGF3YXFxYXMxNCIsImEiOiJjbHBreHhscWEwMWU4MnFyenU3ODdmeTdsIn0.8IlEgMNGcbx806t363hDJg';
+    let mapContainer = document.getElementById('mapContainer');
+    let mapElement = document.getElementById('map');
+    let previewContainer = document.getElementById('previewContainer');
+    let previewMapElement = document.getElementById('previewMap');
+
+const map = new mapboxgl.Map({
+container: 'map',
+
+style: 'mapbox://styles/talhawaqqas14/clv3x1c2t00f601qp5mzd3npx',
+zoom: 5.5,
+center: [30, 50],
+
+});
+
+
+
+function moveMapToPreview() {
+      if (window.innerWidth <= 768) {
+        // Move map to preview container
+        if (!previewMapElement.contains(mapElement)) {
+          previewMapElement.appendChild(mapElement);
+          map.resize(); // Ensure the map resizes correctly in the smaller container
+        }
+      } else {
+        // Move map back to the main container
+        if (!mapContainer.contains(mapElement)) {
+          mapContainer.appendChild(mapElement);
+          map.resize(); // Resize map back in the larger container
+        }
+      }
+    }
+
+    // Call the function initially
+    moveMapToPreview();
+
+    // Adjust on window resize
+    window.addEventListener('resize', moveMapToPreview);
+
+
     // Toggling the sidebar
     const toggleSidebar = document.getElementById('toggleSidebar');
     const sidebar = document.getElementById('sidebar');
@@ -249,7 +307,7 @@ function addLocation() {
   newLocation.className = 'flex items-center space-x-2';
   newLocation.innerHTML = `
     <span class="dropdown-text">${locationCount}.</span>
-    <input type="text" placeholder="Enter coordinates (lat,lng)" class="border p-2 rounded w-60 ml-4">
+    <input type="text" placeholder="Enter place" class="border p-2 rounded w-full ml-4">
     <span class="remove-btn" onclick="removeLocation(this)">&#10005;</span>
   `;
   
