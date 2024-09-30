@@ -25,12 +25,7 @@
         .arrow-down {
           transform: rotate(90deg);
         }
-        .remove-btn {
-          cursor: pointer;
-          color: black;
-          font-size: 16px;
-        }
-
+        
 
         /* Custom scrollbar styles */
     ::-webkit-scrollbar {
@@ -110,7 +105,10 @@
                   <div class="flex items-center space-x-2">
                     <span class="dropdown-text">1.</span>
                     <input type="text" placeholder="Enter place" class="border p-2 rounded w-full ml-2" id="coordinatesInput1">
-                    <span class="remove-btn" onclick="removeLocation(this)">&#10005;</span>
+                    <span class="remove-btn" onclick="removeLocation(this)"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-black cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    </span>
                   </div>
                 </div>
                 <!-- Add button below inputs -->
@@ -278,12 +276,32 @@
         });
 
         // Function to toggle dropdowns
-        function toggleDropdown(dropdownId, button) {
-          const dropdown = document.getElementById(dropdownId);
-          const arrow = button.querySelector('.arrow');
-          dropdown.classList.toggle('hidden');
-          arrow.classList.toggle('arrow-down');
-        }
+       // Function to toggle dropdowns
+function toggleDropdown(dropdownId, button) {
+  const dropdowns = document.querySelectorAll('.dropdown > div');
+  const arrows = document.querySelectorAll('.arrow');
+
+  // Close all other dropdowns
+  dropdowns.forEach((dropdown) => {
+    if (dropdown.id !== dropdownId) {
+      dropdown.classList.add('hidden'); // Close other dropdowns
+    }
+  });
+
+  // Reset all arrows
+  arrows.forEach((arrow) => {
+    if (!dropdownId.includes(arrow.closest('.dropdown').querySelector('div').id)) {
+      arrow.classList.remove('arrow-down'); // Reset other arrows
+    }
+  });
+
+  // Toggle the clicked dropdown and arrow
+  const dropdown = document.getElementById(dropdownId);
+  const arrow = button.querySelector('.arrow');
+  dropdown.classList.toggle('hidden');
+  arrow.classList.toggle('arrow-down');
+}
+
 
         // Function to remove a location input
         function removeLocation(element) {
@@ -304,24 +322,30 @@
         }
 
       
-      // Function to add a new location input
-    function addLocation() {
-      const locationsContainer = document.getElementById('locationsContainer');
-      const locationCount = locationsContainer.querySelectorAll('div').length + 1;
-      const newLocation = document.createElement('div');
-      newLocation.className = 'flex items-center space-x-2';
-      newLocation.innerHTML = `
-        <span class="dropdown-text">${locationCount}.</span>
-        <input type="text" placeholder="Enter place" class="border p-2 rounded w-full ml-4">
-        <span class="remove-btn" onclick="removeLocation(this)">&#10005;</span>
-      `;
-      
-      locationsContainer.insertBefore(newLocation, locationsContainer.lastElementChild);
-      updateIndexes();
+  // Function to add a new location input
+  function addLocation() {
+  const locationsContainer = document.getElementById('locationsContainer');
+  const locationCount = locationsContainer.querySelectorAll('div').length + 1;
+  
+  const newLocation = document.createElement('div');
+  newLocation.className = 'flex items-center space-x-2'; // Add consistent flex layout
+  
+  newLocation.innerHTML = `
+    <span class="dropdown-text">${locationCount}.</span>
+    <input type="text" placeholder="Enter coordinates (lat,lng)" class="border p-2 rounded w-full"> <!-- Make sure input takes full width -->
+    <span class="remove-btn" onclick="removeLocation(this)">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-black cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </span>`;
 
-      // Scroll to the bottom of the container
-      locationsContainer.scrollTop = locationsContainer.scrollHeight;
-    }
+  locationsContainer.appendChild(newLocation);
+  updateIndexes();
+
+  // Scroll to the bottom of the container
+  locationsContainer.scrollTop = locationsContainer.scrollHeight;
+}
+
 
 
     function selectTheme(theme) {
