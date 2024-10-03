@@ -98,6 +98,18 @@
                 </svg>                 Places
               </button>
               <div id="dropdown1" class="hidden pl-4">
+                <div class="relative mb-4 mt-2">
+                  <input id="geocoder-input" 
+                         class="w-full p-2 bg-white text-black border border-gray-300 rounded-md focus:border-[#cca385]" 
+                         type="text" 
+                         placeholder="Search for a place..." 
+                         oninput="performGeocoding(this.value)" />
+                  <!-- Geocoding results dropdown -->
+                  <div id="geocoder-results" 
+                       class="absolute w-full bg-white text-black rounded-md border border-gray-300 mt-1 z-10 hidden">
+                  </div>
+                </div>
+        
                 <!-- Scrollable container for inputs -->
                 <div id="locationsContainer" class="flex flex-col space-y-2 max-h-40 overflow-y-auto mt-2 pr-2">
 
@@ -112,9 +124,11 @@
                   </div>
                 </div>
                 <!-- Add button below inputs -->
-                <div class="flex justify-center">
-                  <button onclick="addLocation()" class="bg-[#cca385] text-white px-10 py-1 rounded mt-2 mb-4">Add</button>
+                <div class="flex justify-center space-x-4 my-6">
+                  <button onclick="addLocation()" class="bg-[#cca385] text-white px-6 py-1 rounded w-full">Add</button>
+                  <button onclick="calculateRoute()" class="bg-[#cca385] text-white px-6 py-1 rounded w-full">Route</button>
                 </div>
+                
               </div>
             </div>
 
@@ -202,15 +216,17 @@
             </div>
           </div>
         </div>
-
         <div id="mapWrapper" class="flex-1 bg-gray-200 ml-64 relative">
           <div id="mapContainer" class="absolute top-0 bottom-0 left-0 right-0 m-auto" style="width: 60%; aspect-ratio: 4 / 3; background-color: white; box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2); z-index: 10;">
             <div id="map" class="flex items-center justify-center w-full h-full text-gray-500">
               <!-- Map will appear here -->
             </div>
+            <!-- Canvas overlay -->
+            <canvas id="mapCanvas" class="absolute top-0 left-0 w-full h-full" style="pointer-events: none;"></canvas>
           </div>
         </div>
-
+        
+        
     <!-- Preview Container for smaller screens -->
     <div id="previewContainer" class="hidden bg-white fixed p-4 shadow-xl" style="z-index: 50;">
       <!-- Semi-transparent background -->
@@ -225,141 +241,580 @@
     </div>
       
 
-      <script>
+    <script>
 
-    mapboxgl.accessToken = 'pk.eyJ1IjoidGFsaGF3YXFxYXMxNCIsImEiOiJjbHBreHhscWEwMWU4MnFyenU3ODdmeTdsIn0.8IlEgMNGcbx806t363hDJg';
-        let mapContainer = document.getElementById('mapContainer');
-        let mapElement = document.getElementById('map');
-        let previewContainer = document.getElementById('previewContainer');
-        let previewMapElement = document.getElementById('previewMap');
-
-    const map = new mapboxgl.Map({
-    container: 'map',
-
-    style: 'mapbox://styles/talhawaqqas14/clv3x1c2t00f601qp5mzd3npx',
-    zoom: 5.5,
-    center: [30, 50],
-
-    });
-
-
-
-    function moveMapToPreview() {
-          if (window.innerWidth <= 768) {
-            // Move map to preview container
-            if (!previewMapElement.contains(mapElement)) {
-              previewMapElement.appendChild(mapElement);
-              map.resize(); // Ensure the map resizes correctly in the smaller container
-            }
-          } else {
-            // Move map back to the main container
-            if (!mapContainer.contains(mapElement)) {
-              mapContainer.appendChild(mapElement);
-              map.resize(); // Resize map back in the larger container
+      mapboxgl.accessToken = 'pk.eyJ1IjoidGFsaGF3YXFxYXMxNCIsImEiOiJjbHBreHhscWEwMWU4MnFyenU3ODdmeTdsIn0.8IlEgMNGcbx806t363hDJg';
+          let mapContainer = document.getElementById('mapContainer');
+          let mapElement = document.getElementById('map');
+          let previewContainer = document.getElementById('previewContainer');
+          let previewMapElement = document.getElementById('previewMap');
+  
+      const map = new mapboxgl.Map({
+      container: 'map',
+  
+      style: 'mapbox://styles/talhawaqqas14/cm1s96dl200yw01qvet4c70x3',
+      zoom: 1.2,
+      center: [-145, 30],
+  
+      });
+      map.addControl(new mapboxgl.NavigationControl());
+  
+  
+      function moveMapToPreview() {
+            if (window.innerWidth <= 768) {
+              // Move map to preview container
+              if (!previewMapElement.contains(mapElement)) {
+                previewMapElement.appendChild(mapElement);
+                map.resize(); // Ensure the map resizes correctly in the smaller container
+              }
+            } else {
+              // Move map back to the main container
+              if (!mapContainer.contains(mapElement)) {
+                mapContainer.appendChild(mapElement);
+                map.resize(); // Resize map back in the larger container
+              }
             }
           }
-        }
-
-        // Call the function initially
-        moveMapToPreview();
-
-        // Adjust on window resize
-        window.addEventListener('resize', moveMapToPreview);
-
-
-        // Toggling the sidebar
-        const toggleSidebar = document.getElementById('toggleSidebar');
-        const sidebar = document.getElementById('sidebar');
-
-        toggleSidebar.addEventListener('click', () => {
-          sidebar.classList.toggle('-translate-x-full');
-        });
-
-        // Function to toggle dropdowns
-       // Function to toggle dropdowns
-function toggleDropdown(dropdownId, button) {
-  const dropdowns = document.querySelectorAll('.dropdown > div');
-  const arrows = document.querySelectorAll('.arrow');
-
-  // Close all other dropdowns
-  dropdowns.forEach((dropdown) => {
-    if (dropdown.id !== dropdownId) {
-      dropdown.classList.add('hidden'); // Close other dropdowns
-    }
-  });
-
-  // Reset all arrows
-  arrows.forEach((arrow) => {
-    if (!dropdownId.includes(arrow.closest('.dropdown').querySelector('div').id)) {
-      arrow.classList.remove('arrow-down'); // Reset other arrows
-    }
-  });
-
-  // Toggle the clicked dropdown and arrow
-  const dropdown = document.getElementById(dropdownId);
-  const arrow = button.querySelector('.arrow');
-  dropdown.classList.toggle('hidden');
-  arrow.classList.toggle('arrow-down');
-}
-
-
-        // Function to remove a location input
-        function removeLocation(element) {
-          const locationsContainer = document.getElementById('locationsContainer');
-          const locationRows = locationsContainer.querySelectorAll('div');
-          if (locationRows.length > 1) { // Ensure at least one input remains
-            element.parentElement.remove();
-            updateIndexes();
-          }
-        }
-
-        // Function to update indexes after adding/removing
-        function updateIndexes() {
-          const locationRows = document.querySelectorAll('#locationsContainer > div');
-          locationRows.forEach((row, index) => {
-            row.querySelector('.dropdown-text').textContent = `${index + 1}.`;
+  
+          // Call the function initially
+          moveMapToPreview();
+  
+          // Adjust on window resize
+          window.addEventListener('resize', moveMapToPreview);
+  
+  
+          // Toggling the sidebar
+          const toggleSidebar = document.getElementById('toggleSidebar');
+          const sidebar = document.getElementById('sidebar');
+  
+          toggleSidebar.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
           });
+  
+          // Function to toggle dropdowns
+         // Function to toggle dropdowns
+  function toggleDropdown(dropdownId, button) {
+    const dropdowns = document.querySelectorAll('.dropdown > div');
+    const arrows = document.querySelectorAll('.arrow');
+  
+    // Close all other dropdowns
+    dropdowns.forEach((dropdown) => {
+      if (dropdown.id !== dropdownId) {
+        dropdown.classList.add('hidden'); // Close other dropdowns
+      }
+    });
+  
+    // Reset all arrows
+    arrows.forEach((arrow) => {
+      if (!dropdownId.includes(arrow.closest('.dropdown').querySelector('div').id)) {
+        arrow.classList.remove('arrow-down'); // Reset other arrows
+      }
+    });
+  
+    // Toggle the clicked dropdown and arrow
+    const dropdown = document.getElementById(dropdownId);
+    const arrow = button.querySelector('.arrow');
+    dropdown.classList.toggle('hidden');
+    arrow.classList.toggle('arrow-down');
+  }
+  function removeLocation(element) {
+    const locationsContainer = document.getElementById('locationsContainer');
+    const locationRows = locationsContainer.querySelectorAll('div');
+  
+    const indexToRemove = Array.from(locationRows).indexOf(element.parentElement);
+  
+    if (locationRows.length > 1) {
+      // Remove the corresponding marker from the map
+      if (markers[indexToRemove]) {
+        markers[indexToRemove].remove(); // Remove marker from the map
+        markers.splice(indexToRemove, 1); // Remove marker from the markers array
+      }
+  
+      // Remove the location container from the DOM
+      element.parentElement.remove();
+      updateIndexes();
+    } else if (locationRows.length === 1) {
+      // Clear the last remaining container, but don't remove it
+      const inputField = locationRows[0].querySelector('input');
+      inputField.value = ''; // Clear the input field
+  
+      // Remove the marker if it exists
+      if (markers[0]) {
+        markers[0].remove(); // Remove marker from the map
+        markers = []; // Clear the markers array since no markers are left
+      }
+  
+      // Clear stored coordinates from the dataset
+      locationRows[0].removeAttribute('data-lat');
+      locationRows[0].removeAttribute('data-lng');
+    }
+  
+    // Remove the route line if it exists
+    if (map.getSource('route')) {
+      map.removeLayer('route');
+      map.removeSource('route');
+    }
+  
+    // Recalculate the route only if there are enough remaining points
+    const remainingCoordinates = Array.from(document.querySelectorAll('#locationsContainer > div'))
+      .filter(row => row.dataset.lat && row.dataset.lng);
+  
+    if (remainingCoordinates.length >= 2) {
+      calculateRoute();
+    }
+  }
+  
+  
+  
+  // Function to update indexes after adding/removing locations
+  function updateIndexes() {
+    const locationRows = document.querySelectorAll('#locationsContainer > div');
+    locationRows.forEach((row, index) => {
+      row.querySelector('.dropdown-text').textContent = `${index + 1}.`; // Update the index number
+    });
+  }
+  
+  
+  
+  
+        
+    // Function to add a new location input
+    function addLocation() {
+    const locationsContainer = document.getElementById('locationsContainer');
+    const locationCount = locationsContainer.querySelectorAll('div').length + 1;
+
+    const newLocation = document.createElement('div');
+    newLocation.className = 'flex items-center space-x-2';
+
+    newLocation.innerHTML = `
+        <span class="dropdown-text">${locationCount}.</span>
+        <input type="text" placeholder="Enter coordinates (lat,lng)" class="border p-2 rounded w-full"> 
+        <span class="remove-btn" onclick="removeLocation(this)">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-black cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </span>
+    `;
+
+    locationsContainer.appendChild(newLocation);
+    updateIndexes();
+
+    // Add event listener for the new input field
+    const newInputField = newLocation.querySelector('input');
+    newInputField.addEventListener('input', updateCityNames); // Attach listener here
+
+    // Scroll to the bottom of the container
+    locationsContainer.scrollTop = locationsContainer.scrollHeight;
+}
+
+  let currentRouteData = null; // To store route data
+
+function selectTheme(theme) {
+  selectedTheme = theme; // Update the global theme selection
+  
+  // Save the current route data (if it exists) before changing the theme
+  if (map.getSource('route')) {
+    currentRouteData = map.getSource('route')._data; // Save the current route GeoJSON data
+  }
+
+  // Update map style based on the selected theme
+  const styles = {
+    blue: 'mapbox://styles/talhawaqqas14/cm1s96dl200yw01qvet4c70x3',
+    red: 'mapbox://styles/talhawaqqas14/your-red-style-id',
+    yellow: 'mapbox://styles/talhawaqqas14/your-yellow-style-id',
+    purple: 'mapbox://styles/talhawaqqas14/your-purple-style-id',
+    orange: 'mapbox://styles/talhawaqqas14/your-orange-style-id',
+    pink: 'mapbox://styles/talhawaqqas14/clv3x1c2t00f601qp5mzd3npx',
+    gray: 'mapbox://styles/talhawaqqas14/your-gray-style-id'
+  };
+
+  if (styles[theme]) {
+    map.setStyle(styles[theme]); // Change the map style
+  }
+
+  map.on('style.load', () => {
+    // Re-add the route to the map after the style is reloaded
+    if (currentRouteData) {
+      map.addSource('route', {
+        type: 'geojson',
+        data: currentRouteData // Use the stored route data
+      });
+
+      map.addLayer({
+        id: 'route',
+        type: 'line',
+        source: 'route',
+        layout: {
+          'line-join': 'round',
+          'line-cap': 'round'
+        },
+        paint: {
+          'line-color': routeColors[selectedTheme], // Dynamic route color based on theme
+          'line-width': 4
         }
+      });
+    }
 
-      
-  // Function to add a new location input
-  function addLocation() {
-  const locationsContainer = document.getElementById('locationsContainer');
-  const locationCount = locationsContainer.querySelectorAll('div').length + 1;
-  
-  const newLocation = document.createElement('div');
-  newLocation.className = 'flex items-center space-x-2'; // Add consistent flex layout
-  
-  newLocation.innerHTML = `
-    <span class="dropdown-text">${locationCount}.</span>
-    <input type="text" placeholder="Enter coordinates (lat,lng)" class="border p-2 rounded w-full"> <!-- Make sure input takes full width -->
-    <span class="remove-btn" onclick="removeLocation(this)">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-black cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-      </svg>
-    </span>`;
+    // Re-add markers after the style is reloaded
+    markers.forEach((marker, index) => {
+      const coordinates = marker.getLngLat();
+      const placeName = marker.getPopup().getText();
+      marker.remove(); // Remove the old marker
+      addPointToMap([coordinates.lng, coordinates.lat], placeName, index); // Re-add the marker with the new color
+    });
+  });
 
-  locationsContainer.appendChild(newLocation);
-  updateIndexes();
+  // Update UI: Remove selected class from all containers
+  const containers = document.querySelectorAll('.theme-container');
+  containers.forEach(container => {
+    container.classList.remove('border-[#cca385]', 'border-4');
+  });
 
-  // Scroll to the bottom of the container
-  locationsContainer.scrollTop = locationsContainer.scrollHeight;
+  // Add selected class to the clicked container
+  const selectedContainer = document.querySelector(`.theme-container[onclick*="${theme}"]`);
+  selectedContainer.classList.add('border-[#cca385]', 'border-4');
 }
 
 
+  function performGeocoding(query) {
+    if (!query) {
+      document.getElementById('geocoder-results').classList.add('hidden');
+      return;
+    }
+  
 
-    function selectTheme(theme) {
-        // Remove selected class from all containers
-        const containers = document.querySelectorAll('.theme-container');
-        containers.forEach(container => {
-          container.classList.remove('border-[#cca385]', 'border-4');
+    const geocodingUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxgl.accessToken}`;
+  
+    fetch(geocodingUrl)
+      .then(response => response.json())
+      .then(data => {
+        const resultsContainer = document.getElementById('geocoder-results');
+        resultsContainer.innerHTML = ''; // Clear previous results
+        data.features.forEach(feature => {
+          const placeName = feature.place_name;
+          const coord = feature.geometry.coordinates;
+  
+          const resultItem = document.createElement('div');
+          resultItem.className = 'p-2 hover:bg-[#cca385] cursor-pointer';
+          resultItem.textContent = placeName;
+          resultItem.onclick = () => {
+            updateLatestLocation(placeName, coord); // Update the latest location
+            resultsContainer.classList.add('hidden'); // Hide the results after selection
+          };
+          resultsContainer.appendChild(resultItem);
         });
+        resultsContainer.classList.remove('hidden');
+      })
+      .catch(error => {
+        console.error('Error with geocoding:', error);
+      });
+  }
+  
+  
+  
+  function updateLatestLocation(placeName, coord) {
+    const locationsContainer = document.getElementById('locationsContainer');
+    const locationRows = locationsContainer.querySelectorAll('div');
 
-        // Add selected class to the clicked container
-        const selectedContainer = document.querySelector(`.theme-container[onclick*="${theme}"]`);
-        selectedContainer.classList.add('border-[#cca385]', 'border-4'); // Set thicker border
+    if (locationRows.length === 0) {
+        alert("No location input available. Please add a location first.");
+        return;
+    }
+
+    // Find the last updated location input (this will be the container being modified)
+    const latestLocation = locationRows[locationRows.length - 1];
+    const inputField = latestLocation.querySelector('input');
+
+    // Get the index of the current container to track the marker
+    const locationIndex = Array.from(locationRows).indexOf(latestLocation);
+
+    // Remove the existing marker for this location if it exists
+    if (markers[locationIndex]) {
+        markers[locationIndex].remove(); // Remove the previous marker from the map
+    }
+
+    // Update the input field with the new place name
+    inputField.value = placeName;
+
+    // Store lat/lng in the latest location dataset
+    latestLocation.dataset.lat = coord[1]; // Store latitude
+    latestLocation.dataset.lng = coord[0]; // Store longitude
+
+    // Add the new marker to the map
+    addPointToMap(coord, placeName, locationIndex);
+
+    // Trigger the city name update on the canvas
+    updateCityNames();  
+}
+
+  
+  
+  let markers = []; // Array to store map markers
+  
+  let routeColors = {
+  blue: '#566d71',  // Blue theme route color
+  red: '#ff4c4c',   // Red theme route color
+  yellow: '#ffc107', // Yellow theme route color
+  purple: '#6f42c1', // Purple theme route color
+  orange: '#fd7e14', // Orange theme route color
+  pink: '#e83e8c',   // Pink theme route color
+  gray: '#6c757d'    // Gray theme route color
+};
+
+
+  let themeColors = {
+  blue: '#5b7373', // Blue theme color
+  red: '#ff4c4c', // Red theme color
+  yellow: '#ffc107', // Yellow theme color
+  purple: '#6f42c1', // Purple theme color
+  orange: '#fd7e14', // Orange theme color
+  pink: '#e83e8c', // Pink theme color
+  gray: '#6c757d'  // Gray theme color
+};
+
+let selectedTheme = 'blue'; // Default theme
+
+// Function to add point to the map with a flat round marker
+function addPointToMap(coordinates, placeName, index) {
+  // Create a custom round marker element using a div
+  const markerElement = document.createElement('div');
+  markerElement.className = 'custom-marker'; // Add a class for styling
+  markerElement.style.borderColor = themeColors[selectedTheme]; // Set the border color dynamically based on the theme
+
+  // CSS for flat round marker style
+  markerElement.style.width = '12px'; // Set the width of the marker to 10px
+  markerElement.style.height = '12px'; // Set the height of the marker to 10px
+  markerElement.style.borderRadius = '50%'; // Make the marker round
+  markerElement.style.border = `2px solid ${themeColors[selectedTheme]}`; // Border color from theme
+  markerElement.style.backgroundColor = '#ffffff'; // Set the background to white
+  markerElement.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.2)'; // Optional: subtle shadow for depth
+  markerElement.style.cursor = 'pointer'; // Make the marker clickable
+
+  // Create a new Mapbox marker using the custom round div
+  const newMarker = new mapboxgl.Marker({
+    element: markerElement, // Use the custom round div as the marker
+    anchor: 'center' // Center the marker on the coordinates
+  })
+    .setLngLat(coordinates)
+    .setPopup(new mapboxgl.Popup().setHTML(`<strong>${placeName}</strong>`)) // Optional popup with place name
+    .addTo(map);
+
+  // Store the new marker in the markers array, replacing any existing marker at the same index
+  markers[index] = newMarker;
+
+  // Zoom to the selected location
+  map.flyTo({
+    center: coordinates,
+    essential: true, // This animation is considered essential with respect to prefers-reduced-motion
+    zoom: 14
+  });
+}
+  
+  function calculateRoute() {
+    const coordinates = [];
+    document.querySelectorAll('#locationsContainer > div').forEach(location => {
+      const lat = location.dataset.lat;
+      const lng = location.dataset.lng;
+      if (lat && lng) {
+        coordinates.push([lng, lat]); // Coordinates are stored as [lng, lat]
       }
+    });
+  
+    if (coordinates.length < 2) {
+      alert("Please enter at least two valid locations.");
+      return;
+    }
+  
+    const query = coordinates.map(c => `${c[0]},${c[1]}`).join(';');
+    const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${query}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
+  
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        const route = data.routes[0].geometry;
+        displayRouteOnMap(route);
+      })
+      .catch(error => {
+        console.error('Error fetching route:', error);
+        alert("Unable to calculate the route. Please try again.");
+      });
+  }
+  
+  
+  
+  
+  function displayRouteOnMap(route) {
+  if (map.getSource('route')) {
+    map.removeLayer('route');
+    map.removeSource('route');
+  }
 
-      </script>
+  map.addSource('route', {
+    type: 'geojson',
+    data: {
+      type: 'Feature',
+      properties: {},
+      geometry: route
+    }
+  });
+
+  map.addLayer({
+    id: 'route',
+    type: 'line',
+    source: 'route',
+    layout: {
+      'line-join': 'round',
+      'line-cap': 'round'
+    },
+    paint: {
+      'line-color': routeColors[selectedTheme], // Dynamic route color based on theme
+      'line-width': 4
+    }
+  });
+
+  const bounds = new mapboxgl.LngLatBounds();
+  route.coordinates.forEach(coord => {
+    bounds.extend(coord);
+  });
+  map.fitBounds(bounds, { padding: 50 });
+}
+
+
+// Get the canvas element and context
+const canvas = document.getElementById('mapCanvas');
+const ctx = canvas.getContext('2d');
+
+// City names display toggle
+let displayCityNames = true;
+
+// Adjust the canvas size dynamically if needed
+function resizeCanvas() {
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+
+    // Redraw the city names whenever the canvas size changes
+    if (displayCityNames) {
+        drawCityNamesOnCanvas();
+    }
+}
+
+// Call resizeCanvas on load and window resize
+window.addEventListener('load', resizeCanvas);
+window.addEventListener('resize', resizeCanvas);
+
+// Function to draw city names on the canvas
+function drawCityNamesOnCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous drawings
+
+    // Get all location input fields
+    const locationRows = document.querySelectorAll('#locationsContainer > div');
+    const textColor = themeColors[selectedTheme]; // Get color based on selected theme
+
+    const fontSize = 14; // Set the font size to 14px (reduced from 20px)
+    const lineHeight = 20; // Line height between text entries
+
+    ctx.fillStyle = textColor; // Set text color
+    ctx.font = `${fontSize}px Arial`; // Set font size and style
+
+    // Start drawing from the bottom left of the canvas
+    const startY = canvas.height - 20; // Position 20px from the bottom of the canvas
+    const startX = 20; // Position 20px from the left edge of the canvas
+
+    // Draw city names from the bottom up
+    locationRows.forEach((row, index) => {
+        const inputField = row.querySelector('input');
+        const cityName = inputField.value.trim() || `City ${index + 1}`; // Default to "City X" if empty
+
+        const positionY = startY - (locationRows.length - 1 - index) * lineHeight; // Calculate Y position from bottom up
+
+        // Draw the text at the calculated position
+        ctx.fillText(`${index + 1}. ${cityName}`, startX, positionY);
+    });
+}
+
+
+// Function to update city names on canvas when input changes
+function updateCityNames() {
+    drawCityNamesOnCanvas(); // Directly call the drawing function
+}
+
+// Add event listeners to input fields to update canvas on change
+function addInputListeners() {
+    // Ensure we attach listeners to current and future input fields
+    const locationRows = document.querySelectorAll('#locationsContainer input');
+    locationRows.forEach(input => {
+        input.addEventListener('input', updateCityNames);
+    });
+}
+
+// Toggle visibility of city names
+document.getElementById('toggleCityNames').addEventListener('click', () => {
+    displayCityNames = !displayCityNames;
+    if (displayCityNames) {
+        drawCityNamesOnCanvas(); // Redraw city names if they're being displayed
+    } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas if not displaying
+    }
+});
+
+// Initialize input listeners and initial drawing of city names
+addInputListeners();
+drawCityNamesOnCanvas();
+
+
+function downloadMapWithOverlay() {
+    const scaleFactor = 300 / 72; // Scaling factor to achieve 300 DPI
+
+    // Get current canvas dimensions
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
+
+    // Create an off-screen canvas
+    const offScreenCanvas = document.createElement('canvas');
+    const offScreenCtx = offScreenCanvas.getContext('2d');
+
+    // Set the off-screen canvas size scaled for 300 DPI
+    offScreenCanvas.width = canvasWidth * scaleFactor;
+    offScreenCanvas.height = canvasHeight * scaleFactor;
+
+    // Fetch the current static map image from Mapbox Static API
+    const mapCenter = map.getCenter(); // Get map center
+    const mapZoom = map.getZoom();     // Get map zoom level
+    const mapStyle = map.getStyle().sprite.split('/styles/v1/')[1].split('/')[0]; // Get current map style
+
+    // Mapbox Static API URL
+    const staticMapUrl = `https://api.mapbox.com/styles/v1/mapbox/${mapStyle}/static/${mapCenter.lng},${mapCenter.lat},${mapZoom},0/${canvasWidth}x${canvasHeight}?access_token=${mapboxgl.accessToken}`;
+
+    // Load the static map image
+    const mapImage = new Image();
+    mapImage.crossOrigin = "anonymous";
+    mapImage.src = staticMapUrl;
+
+    mapImage.onload = function() {
+        // Draw the map image on the off-screen canvas at 300 DPI
+        offScreenCtx.drawImage(mapImage, 0, 0, canvasWidth * scaleFactor, canvasHeight * scaleFactor);
+
+        // Now draw the overlay from the current canvas
+        offScreenCtx.drawImage(canvas, 0, 0, canvasWidth * scaleFactor, canvasHeight * scaleFactor);
+
+        // Convert the off-screen canvas to JPEG
+        const dataURL = offScreenCanvas.toDataURL('image/jpeg', 1.0); // 100% quality
+
+        // Create a download link
+        const downloadLink = document.createElement('a');
+        downloadLink.href = dataURL;
+        downloadLink.download = 'map_with_overlay_300dpi.jpg';
+
+        // Simulate a click to download the image
+        downloadLink.click();
+    };
+
+    mapImage.onerror = function() {
+        alert('Failed to load the map image.');
+    };
+}
+
+
+        </script>
     </body>
     </html>
