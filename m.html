@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapbox Map Export</title>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        #map {
+            width: 800px;
+            height: 600px;
+            margin-bottom: 20px;
+        }
+        input, select, button {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Export Mapbox Map</h1>
+
+<div id="map"></div>
+
+<!-- Input fields for width, height, and DPI -->
+<label for="widthInput">Width (inches):</label>
+<input type="number" id="widthInput" value="8" step="0.1">
+<label for="heightInput">Height (inches):</label>
+<input type="number" id="heightInput" value="6" step="0.1">
+<label for="dpiInput">DPI:</label>
+<input type="number" id="dpiInput" value="300">
+<label for="outputOptions">Output format:</label>
+<select id="outputOptions">
+    <option value="png">PNG</option>
+    <option value="pdf">PDF</option>
+</select>
+
+<!-- Button to trigger map export -->
+<button id="generate-btn">Generate Map</button>
+
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+    // Set your Mapbox access token
+    mapboxgl.accessToken = 'pk.eyJ1IjoidGFsaGF3YXFxYXMxNCIsImEiOiJjbHBreHhscWEwMWU4MnFyenU3ODdmeTdsIn0.8IlEgMNGcbx806t363hDJg';
+
+    // Initialize the map
+    const map = new mapboxgl.Map({
+        container: 'map',  // The container ID
+        style: 'mapbox://styles/talhawaqqas14/cm1s96dl200yw01qvet4c70x3',  // Map style
+        center: [-74.5, 40],  // Initial map center [longitude, latitude]
+        zoom: 9  // Initial zoom level
+    });
+
+    document.getElementById('generate-btn').addEventListener('click', generateMap);
+
+    function generateMap() {
+        'use strict';
+
+        // Get user-defined values for width, height, and DPI
+        const width = Number(document.getElementById('widthInput').value);  // User input for width
+        const height = Number(document.getElementById('heightInput').value);  // User input for height
+        const dpi = Number(document.getElementById('dpiInput').value);  // User input for DPI
+        const format = document.getElementById('outputOptions').value === 'png' ? 'png' : 'pdf';  // Output format
+
+        if (width <= 0 || height <= 0 || dpi <= 0) {
+            alert("Width, height, and DPI must be positive numbers!");
+            return;
+        }
+
+        // Calculate the required pixel dimensions based on DPI
+        const pixelWidth = width * dpi;
+        const pixelHeight = height * dpi;
+
+        // Get current map state
+        const zoom = map.getZoom();
+        const center = map.getCenter();
+        const bearing = map.getBearing();
+        const pitch = map.getPitch();
+        const style = map.getStyle();
+
+        // Create the high-resolution map
+        createPrintMap(pixelWidth, pixelHeight, dpi, format, zoom, center, bearing, pitch, style);
+    }
+    function createPrintMap(pixelWidth, pixelHeight, dpi, format, zoom, center, bearing, pitch, style) {
+    'use strict';
+
+    // Adjust the devicePixelRatio for high-resolution rendering
+    const actualPixelRatio = window.devicePixelRatio;
+    Object.defineProperty(window, 'devicePixelRatio', {
+        get: function () { return dpi / 96; }
+    });
+
+    // Calculate the display container size (800x600 in your case)
+    const containerWidth = 800;  // The width of the visible map container
+    const containerHeight = 600;  // The height of the visible map container
+
+    // Adjust the zoom level to compensate for the larger pixel dimensions
+    const adjustedZoom = zoom + Math.log2(Math.min(pixelWidth / containerWidth, pixelHeight / containerHeight));
+
+    // Create a hidden map container for rendering the high-resolution map
+    const hiddenMapContainer = document.createElement('div');
+    hiddenMapContainer.style.width = pixelWidth + 'px';
+    hiddenMapContainer.style.height = pixelHeight + 'px';
+    hiddenMapContainer.style.position = 'absolute';   // Prevent affecting page layout
+    hiddenMapContainer.style.top = '-9999px';         // Move it out of the viewport
+    hiddenMapContainer.style.left = '-9999px';        // Move it out of the viewport
+    hiddenMapContainer.style.clip = 'rect(0, 0, 0, 0)';  // Ensure it's fully clipped
+    document.body.appendChild(hiddenMapContainer);
+
+    // Initialize a new Mapbox map in the hidden container
+    const printMap = new mapboxgl.Map({
+        container: hiddenMapContainer,
+        center: center,
+        zoom: adjustedZoom,  // Use the adjusted zoom level
+        style: style,
+        bearing: bearing,
+        pitch: pitch,
+        interactive: false,  // Disable interactions for the print map
+        preserveDrawingBuffer: true  // Necessary for toBlob() or toDataURL()
+    });
+
+    // Wait until the map finishes loading before exporting
+    printMap.once('load', function () {
+        if (format === 'png') {
+            printMap.getCanvas().toBlob(function (blob) {
+                // Download the PNG
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'map.png';
+                link.click();
+
+                // Clean up
+                URL.revokeObjectURL(link.href);
+                document.body.removeChild(hiddenMapContainer);
+                Object.defineProperty(window, 'devicePixelRatio', { get: function () { return actualPixelRatio; } });
+            });
+        } else {
+            // PDF Generation using jsPDF
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({
+                orientation: pixelWidth > pixelHeight ? 'l' : 'p',
+                unit: 'pt',
+                format: [pixelWidth, pixelHeight]
+            });
+
+            pdf.addImage(printMap.getCanvas().toDataURL('image/png'), 'PNG', 0, 0, pixelWidth, pixelHeight);
+            pdf.save('map.pdf');
+
+            // Clean up
+            document.body.removeChild(hiddenMapContainer);
+            Object.defineProperty(window, 'devicePixelRatio', { get: function () { return actualPixelRatio; } });
+        }
+
+        // Remove the print map instance
+        printMap.remove();
+    });
+}
+
+</script>
+</body>
+</html>

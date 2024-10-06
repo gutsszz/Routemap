@@ -7,6 +7,7 @@
       <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400&display=swap" rel="stylesheet">
       <link href="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css" rel="stylesheet">
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
       
       <script src="https://cdn.tailwindcss.com"></script>
       <style>
@@ -114,14 +115,7 @@
                 <div id="locationsContainer" class="flex flex-col space-y-2 max-h-40 overflow-y-auto mt-2 pr-2">
 
                   <!-- First input row -->
-                  <div class="flex items-center space-x-2">
-                    <span class="dropdown-text">1.</span>
-                    <input type="text" placeholder="Enter place" class="border p-2 rounded w-full ml-2" id="coordinatesInput1">
-                    <span class="remove-btn" onclick="removeLocation(this)"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-black cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                    </span>
-                  </div>
+                 
                 </div>
                 <!-- Add button below inputs -->
                 <div class="flex justify-center space-x-4 my-6">
@@ -208,10 +202,27 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>              Dropdown 4
               </button>
-              <div id="dropdown4" class="hidden pl-4">
-                <p class="text-gray-600 dropdown-text">Option 1</p>
-                <p class="text-gray-600 dropdown-text">Option 2</p>
-                <p class="text-gray-600 dropdown-text">Option 3</p>
+              <div id="dropdown4" class="hidden pl-4"><button id="toggleCityNames" >
+                Toggle City Names
+            </button>
+            <br>
+            
+            <label for="widthInput">Width (inches):</label>
+<input type="number" id="widthInput" value="8" step="0.1">
+<label for="heightInput">Height (inches):</label>
+<input type="number" id="heightInput" value="6" step="0.1">
+<label for="dpiInput">DPI:</label>
+<input type="number" id="dpiInput" value="300">
+<label for="outputOptions">Output format:</label>
+<select id="outputOptions">
+    <option value="png">PNG</option>
+    <option value="pdf">PDF</option>
+</select>
+
+<!-- Button to trigger map export -->
+<button id="generate-btn">Generate Map</button>
+                
+
               </div>
             </div>
           </div>
@@ -255,6 +266,7 @@
       style: 'mapbox://styles/talhawaqqas14/cm1s96dl200yw01qvet4c70x3',
       zoom: 1.2,
       center: [-145, 30],
+      preserveDrawingBuffer: true,
   
       });
       map.addControl(new mapboxgl.NavigationControl());
@@ -320,51 +332,53 @@
   function removeLocation(element) {
     const locationsContainer = document.getElementById('locationsContainer');
     const locationRows = locationsContainer.querySelectorAll('div');
-  
+
     const indexToRemove = Array.from(locationRows).indexOf(element.parentElement);
-  
+
     if (locationRows.length > 1) {
-      // Remove the corresponding marker from the map
-      if (markers[indexToRemove]) {
-        markers[indexToRemove].remove(); // Remove marker from the map
-        markers.splice(indexToRemove, 1); // Remove marker from the markers array
-      }
-  
-      // Remove the location container from the DOM
-      element.parentElement.remove();
-      updateIndexes();
+        // Remove the corresponding marker from the map
+        if (markers[indexToRemove]) {
+            markers[indexToRemove].remove(); // Remove marker from the map
+            markers.splice(indexToRemove, 1); // Remove marker from the markers array
+        }
+
+        // Remove the location container from the DOM
+        element.parentElement.remove();
+        updateIndexes();
     } else if (locationRows.length === 1) {
-      // Clear the last remaining container, but don't remove it
-      const inputField = locationRows[0].querySelector('input');
-      inputField.value = ''; // Clear the input field
-  
-      // Remove the marker if it exists
-      if (markers[0]) {
-        markers[0].remove(); // Remove marker from the map
-        markers = []; // Clear the markers array since no markers are left
-      }
-  
-      // Clear stored coordinates from the dataset
-      locationRows[0].removeAttribute('data-lat');
-      locationRows[0].removeAttribute('data-lng');
+        // Clear the last remaining container, but don't remove it
+        const inputField = locationRows[0].querySelector('input');
+        inputField.value = ''; // Clear the input field
+
+        // Remove the marker if it exists
+        if (markers[0]) {
+            markers[0].remove(); // Remove marker from the map
+            markers = []; // Clear the markers array since no markers are left
+        }
+
+        // Clear stored coordinates from the dataset
+        locationRows[0].removeAttribute('data-lat');
+        locationRows[0].removeAttribute('data-lng');
     }
-  
+
     // Remove the route line if it exists
     if (map.getSource('route')) {
-      map.removeLayer('route');
-      map.removeSource('route');
+        map.removeLayer('route');
+        map.removeSource('route');
     }
-  
+
     // Recalculate the route only if there are enough remaining points
     const remainingCoordinates = Array.from(document.querySelectorAll('#locationsContainer > div'))
-      .filter(row => row.dataset.lat && row.dataset.lng);
-  
+        .filter(row => row.dataset.lat && row.dataset.lng);
+
     if (remainingCoordinates.length >= 2) {
-      calculateRoute();
+        calculateRoute();
     }
-  }
-  
-  
+
+    // Update the canvas text after location removal
+    updateCityNames();
+}
+
   
   // Function to update indexes after adding/removing locations
   function updateIndexes() {
@@ -373,9 +387,6 @@
       row.querySelector('.dropdown-text').textContent = `${index + 1}.`; // Update the index number
     });
   }
-  
-  
-  
   
         
     // Function to add a new location input
@@ -406,6 +417,9 @@
     // Scroll to the bottom of the container
     locationsContainer.scrollTop = locationsContainer.scrollHeight;
 }
+
+
+addLocation();
 
   let currentRouteData = null; // To store route data
 
@@ -738,14 +752,6 @@ function updateCityNames() {
     drawCityNamesOnCanvas(); // Directly call the drawing function
 }
 
-// Add event listeners to input fields to update canvas on change
-function addInputListeners() {
-    // Ensure we attach listeners to current and future input fields
-    const locationRows = document.querySelectorAll('#locationsContainer input');
-    locationRows.forEach(input => {
-        input.addEventListener('input', updateCityNames);
-    });
-}
 
 // Toggle visibility of city names
 document.getElementById('toggleCityNames').addEventListener('click', () => {
@@ -757,62 +763,112 @@ document.getElementById('toggleCityNames').addEventListener('click', () => {
     }
 });
 
-// Initialize input listeners and initial drawing of city names
-addInputListeners();
-drawCityNamesOnCanvas();
+document.getElementById('generate-btn').addEventListener('click', generateMap);
 
+    function generateMap() {
+        'use strict';
 
-function downloadMapWithOverlay() {
-    const scaleFactor = 300 / 72; // Scaling factor to achieve 300 DPI
+        // Get user-defined values for width, height, and DPI
+        const width = Number(document.getElementById('widthInput').value);  // User input for width
+        const height = Number(document.getElementById('heightInput').value);  // User input for height
+        const dpi = Number(document.getElementById('dpiInput').value);  // User input for DPI
+        const format = document.getElementById('outputOptions').value === 'png' ? 'png' : 'pdf';  // Output format
 
-    // Get current canvas dimensions
-    const canvasWidth = canvas.width;
-    const canvasHeight = canvas.height;
+        if (width <= 0 || height <= 0 || dpi <= 0) {
+            alert("Width, height, and DPI must be positive numbers!");
+            return;
+        }
 
-    // Create an off-screen canvas
-    const offScreenCanvas = document.createElement('canvas');
-    const offScreenCtx = offScreenCanvas.getContext('2d');
+        // Calculate the required pixel dimensions based on DPI
+        const pixelWidth = width * dpi;
+        const pixelHeight = height * dpi;
 
-    // Set the off-screen canvas size scaled for 300 DPI
-    offScreenCanvas.width = canvasWidth * scaleFactor;
-    offScreenCanvas.height = canvasHeight * scaleFactor;
+        // Get current map state
+        const zoom = map.getZoom();
+        const center = map.getCenter();
+        const bearing = map.getBearing();
+        const pitch = map.getPitch();
+        const style = map.getStyle();
 
-    // Fetch the current static map image from Mapbox Static API
-    const mapCenter = map.getCenter(); // Get map center
-    const mapZoom = map.getZoom();     // Get map zoom level
-    const mapStyle = map.getStyle().sprite.split('/styles/v1/')[1].split('/')[0]; // Get current map style
+        // Create the high-resolution map
+        createPrintMap(pixelWidth, pixelHeight, dpi, format, zoom, center, bearing, pitch, style);
+    }
+    function createPrintMap(pixelWidth, pixelHeight, dpi, format, zoom, center, bearing, pitch, style) {
+    'use strict';
 
-    // Mapbox Static API URL
-    const staticMapUrl = `https://api.mapbox.com/styles/v1/mapbox/${mapStyle}/static/${mapCenter.lng},${mapCenter.lat},${mapZoom},0/${canvasWidth}x${canvasHeight}?access_token=${mapboxgl.accessToken}`;
+    // Adjust the devicePixelRatio for high-resolution rendering
+    const actualPixelRatio = window.devicePixelRatio;
+    Object.defineProperty(window, 'devicePixelRatio', {
+        get: function () { return dpi / 96; }
+    });
 
-    // Load the static map image
-    const mapImage = new Image();
-    mapImage.crossOrigin = "anonymous";
-    mapImage.src = staticMapUrl;
+    // Calculate the display container size (800x600 in your case)
+    const containerWidth = 800;  // The width of the visible map container
+    const containerHeight = 600;  // The height of the visible map container
 
-    mapImage.onload = function() {
-        // Draw the map image on the off-screen canvas at 300 DPI
-        offScreenCtx.drawImage(mapImage, 0, 0, canvasWidth * scaleFactor, canvasHeight * scaleFactor);
+    // Adjust the zoom level to compensate for the larger pixel dimensions
+    const adjustedZoom = zoom + Math.log2(Math.min(pixelWidth / containerWidth, pixelHeight / containerHeight));
 
-        // Now draw the overlay from the current canvas
-        offScreenCtx.drawImage(canvas, 0, 0, canvasWidth * scaleFactor, canvasHeight * scaleFactor);
+    // Create a hidden map container for rendering the high-resolution map
+    const hiddenMapContainer = document.createElement('div');
+    hiddenMapContainer.style.width = pixelWidth + 'px';
+    hiddenMapContainer.style.height = pixelHeight + 'px';
+    hiddenMapContainer.style.position = 'absolute';   // Prevent affecting page layout
+    hiddenMapContainer.style.top = '-9999px';         // Move it out of the viewport
+    hiddenMapContainer.style.left = '-9999px';        // Move it out of the viewport
+    hiddenMapContainer.style.clip = 'rect(0, 0, 0, 0)';  // Ensure it's fully clipped
+    document.body.appendChild(hiddenMapContainer);
 
-        // Convert the off-screen canvas to JPEG
-        const dataURL = offScreenCanvas.toDataURL('image/jpeg', 1.0); // 100% quality
+    // Initialize a new Mapbox map in the hidden container
+    const printMap = new mapboxgl.Map({
+        container: hiddenMapContainer,
+        center: center,
+        zoom: adjustedZoom,  // Use the adjusted zoom level
+        style: style,
+        bearing: bearing,
+        pitch: pitch,
+        interactive: false,  // Disable interactions for the print map
+        preserveDrawingBuffer: true  // Necessary for toBlob() or toDataURL()
+    });
 
-        // Create a download link
-        const downloadLink = document.createElement('a');
-        downloadLink.href = dataURL;
-        downloadLink.download = 'map_with_overlay_300dpi.jpg';
+    // Wait until the map finishes loading before exporting
+    printMap.once('load', function () {
+        if (format === 'png') {
+            printMap.getCanvas().toBlob(function (blob) {
+                // Download the PNG
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'map.png';
+                link.click();
 
-        // Simulate a click to download the image
-        downloadLink.click();
-    };
+                // Clean up
+                URL.revokeObjectURL(link.href);
+                document.body.removeChild(hiddenMapContainer);
+                Object.defineProperty(window, 'devicePixelRatio', { get: function () { return actualPixelRatio; } });
+            });
+        } else {
+            // PDF Generation using jsPDF
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({
+                orientation: pixelWidth > pixelHeight ? 'l' : 'p',
+                unit: 'pt',
+                format: [pixelWidth, pixelHeight]
+            });
 
-    mapImage.onerror = function() {
-        alert('Failed to load the map image.');
-    };
+            pdf.addImage(printMap.getCanvas().toDataURL('image/png'), 'PNG', 0, 0, pixelWidth, pixelHeight);
+            pdf.save('map.pdf');
+
+            // Clean up
+            document.body.removeChild(hiddenMapContainer);
+            Object.defineProperty(window, 'devicePixelRatio', { get: function () { return actualPixelRatio; } });
+        }
+
+        // Remove the print map instance
+        printMap.remove();
+    });
 }
+
+
 
 
         </script>
