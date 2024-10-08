@@ -104,13 +104,21 @@
 
     // Create a hidden map container for rendering the high-resolution map
     const hiddenMapContainer = document.createElement('div');
-    hiddenMapContainer.style.width = pixelWidth + 'px';
-    hiddenMapContainer.style.height = pixelHeight + 'px';
-    hiddenMapContainer.style.position = 'absolute';   // Prevent affecting page layout
-    hiddenMapContainer.style.top = '-9999px';         // Move it out of the viewport
-    hiddenMapContainer.style.left = '-9999px';        // Move it out of the viewport
-    hiddenMapContainer.style.clip = 'rect(0, 0, 0, 0)';  // Ensure it's fully clipped
-    document.body.appendChild(hiddenMapContainer);
+hiddenMapContainer.style.width = pixelWidth + 'px';
+hiddenMapContainer.style.height = pixelHeight + 'px';
+hiddenMapContainer.style.position = 'absolute';   // Prevent affecting page layout
+hiddenMapContainer.style.top = '-9999px';         // Move it out of the viewport
+hiddenMapContainer.style.left = '-9999px';        // Move it out of the viewport
+hiddenMapContainer.style.clip = 'rect(0, 0, 0, 0)';  // Ensure it's fully clipped
+document.body.appendChild(hiddenMapContainer);
+
+// Create a canvas element
+const hiddenCanvas = document.createElement('canvas');
+hiddenCanvas.width = pixelWidth*3;
+hiddenCanvas.height = pixelHeight*3;
+
+// Append the canvas to the hidden map container
+hiddenMapContainer.appendChild(hiddenCanvas);
 
     // Initialize a new Mapbox map in the hidden container
     const printMap = new mapboxgl.Map({
@@ -126,8 +134,30 @@
 
     // Wait until the map finishes loading before exporting
     printMap.once('load', function () {
+
+        const hiddenCtx = hiddenCanvas.getContext('2d');
+
+// Get the original canvas
+const originalCanvas = printMap.getCanvas();
+
+// Draw the original canvas onto the hidden canvas
+hiddenCtx.drawImage(originalCanvas, 0, 0);
+
+// Add text to the hidden canvas
+hiddenCtx.fillStyle = 'red'; // Set the text color
+hiddenCtx.font = '100px Arial'; // Set the font size and type
+hiddenCtx.fillText('Your Text Here', 100, 4000); // Draw the text at (10, 
+        
+
+      
+
+
+
+
+
+
         if (format === 'png') {
-            printMap.getCanvas().toBlob(function (blob) {
+            hiddenCanvas.toBlob(function (blob) {
                 // Download the PNG
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
@@ -148,7 +178,7 @@
                 format: [pixelWidth, pixelHeight]
             });
 
-            pdf.addImage(printMap.getCanvas().toDataURL('image/png'), 'PNG', 0, 0, pixelWidth, pixelHeight);
+            pdf.addImage(hiddenCanvas.toDataURL('image/png'), 'PNG', 0, 0, pixelWidth, pixelHeight);
             pdf.save('map.pdf');
 
             // Clean up

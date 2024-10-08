@@ -269,7 +269,7 @@
       preserveDrawingBuffer: true,
   
       });
-      map.addControl(new mapboxgl.NavigationControl());
+
   
   
       function moveMapToPreview() {
@@ -716,23 +716,28 @@ function resizeCanvas() {
 window.addEventListener('load', resizeCanvas);
 window.addEventListener('resize', resizeCanvas);
 
-// Function to draw city names on the canvas
-function drawCityNamesOnCanvas() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous drawings
+
+
+function printtext(ctx) {
+    
 
     // Get all location input fields
     const locationRows = document.querySelectorAll('#locationsContainer > div');
     const textColor = themeColors[selectedTheme]; // Get color based on selected theme
 
-    const fontSize = 14; // Set the font size to 14px (reduced from 20px)
-    const lineHeight = 20; // Line height between text entries
+    const fontSize = 140; // Set the font size to 14px (reduced from 20px)
+    const lineHeight = 180; // Line height between text entries
 
     ctx.fillStyle = textColor; // Set text color
     ctx.font = `${fontSize}px Arial`; // Set font size and style
 
     // Start drawing from the bottom left of the canvas
-    const startY = canvas.height - 20; // Position 20px from the bottom of the canvas
-    const startX = 20; // Position 20px from the left edge of the canvas
+    const startY =  5200; // Position 20px from the bottom of the canvas
+    const startX = 200; // Position 20px from the left edge of the canvas
+
+     // Ensure text alignment is set to 'left' for the city names
+    ctx.textAlign = 'left'; // Set text alignment to left for city names
+    ctx.textBaseline = 'alphabetic'; // Standard text baseline for city names
 
     // Draw city names from the bottom up
     locationRows.forEach((row, index) => {
@@ -744,6 +749,125 @@ function drawCityNamesOnCanvas() {
         // Draw the text at the calculated position
         ctx.fillText(`${index + 1}. ${cityName}`, startX, positionY);
     });
+
+ // Get user input for title, message, and subtext
+ const title = titleInput.value.trim() || 'Title'; // Default to 'Title' if empty
+    const message = messageInput.value.trim() || 'Message'; // Default to 'Message' if empty
+    const subText = subTextInput.value.trim() || 'Subtext'; // Default to 'Subtext' if empty
+
+    // Set text properties for the title, message, and subtext
+    const titleFontSize = 220; // Title font size
+    const messageFontSize = 180; // Message font size
+    const subTextFontSize = 140; // Subtext font size
+
+    // Set font and alignment for title, message, and subtext
+    ctx.fillStyle = textColor; // Set the fill color to theme color
+    ctx.textAlign = 'right'; // Align text to the right for title, message, subtext
+    ctx.textBaseline = 'top'; // Align text to the top
+
+    // Position for text at the top-right corner
+    const margin = 200; // Margin from the edges
+    const titleX = 7000;
+    const titleY = margin;
+
+    // Draw the title at the top-right
+    ctx.font = `bold ${titleFontSize}px Arial`; // Title font
+    ctx.fillText(title, titleX, titleY);
+
+    // Draw the message below the title
+    ctx.font = `${messageFontSize}px Arial`; // Message font
+    const messageY = titleY + titleFontSize + 60; // Position message below title
+    ctx.fillText(message, titleX, messageY);
+
+    // Draw the subtext below the message
+    ctx.font = `${subTextFontSize}px Arial`; // Subtext font
+    const subTextY = messageY + messageFontSize + 60; // Position subtext below message
+    ctx.fillText(subText, titleX, subTextY);
+
+
+
+}
+
+
+
+
+// Get references to the text input fields
+const titleInput = document.getElementById('titleInput');
+const messageInput = document.getElementById('messageInput');
+const subTextInput = document.getElementById('subTextInput');
+
+
+// Event listeners to update the canvas as the user types
+titleInput.addEventListener('input', drawCityNamesOnCanvas);
+messageInput.addEventListener('input', drawCityNamesOnCanvas);
+subTextInput.addEventListener('input', drawCityNamesOnCanvas);
+
+
+
+
+// Function to draw city names on the canvas
+function drawCityNamesOnCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous drawings
+
+    const textColor = themeColors[selectedTheme]; // Get color based on selected theme
+    const fontSize = 14; // Set the font size for city names
+    const lineHeight = 20; // Line height between text entries
+    ctx.fillStyle = textColor; // Set text color
+    ctx.font = `${fontSize}px Arial`; // Set font size and style for city names
+
+    // Start drawing city names from the bottom left of the canvas
+    const startY = canvas.height - 20; // Position 20px from the bottom of the canvas
+    const startX = 20; // Position 20px from the left edge of the canvas
+
+    // Ensure text alignment is set to 'left' for the city names
+    ctx.textAlign = 'left'; // Set text alignment to left for city names
+    ctx.textBaseline = 'alphabetic'; // Standard text baseline for city names
+
+    // Draw city names from the bottom up
+    const locationRows = document.querySelectorAll('#locationsContainer > div');
+    locationRows.forEach((row, index) => {
+        const inputField = row.querySelector('input');
+        const cityName = inputField.value.trim() || `City ${index + 1}`; // Default to "City X" if empty
+
+        const positionY = startY - (locationRows.length - 1 - index) * lineHeight; // Calculate Y position from bottom up
+
+        // Draw the city name text at the calculated position
+        ctx.fillText(`${index + 1}. ${cityName}`, startX, positionY);
+    });
+
+    // Get user input for title, message, and subtext
+    const title = titleInput.value.trim() || 'Title'; // Default to 'Title' if empty
+    const message = messageInput.value.trim() || 'Message'; // Default to 'Message' if empty
+    const subText = subTextInput.value.trim() || 'Subtext'; // Default to 'Subtext' if empty
+
+    // Set text properties for the title, message, and subtext
+    const titleFontSize = 24; // Title font size
+    const messageFontSize = 18; // Message font size
+    const subTextFontSize = 14; // Subtext font size
+
+    // Set font and alignment for title, message, and subtext
+    ctx.fillStyle = textColor; // Set the fill color to theme color
+    ctx.textAlign = 'right'; // Align text to the right for title, message, subtext
+    ctx.textBaseline = 'top'; // Align text to the top
+
+    // Position for text at the top-right corner
+    const margin = 20; // Margin from the edges
+    const titleX = canvas.width - margin;
+    const titleY = margin;
+
+    // Draw the title at the top-right
+    ctx.font = `bold ${titleFontSize}px Arial`; // Title font
+    ctx.fillText(title, titleX, titleY);
+
+    // Draw the message below the title
+    ctx.font = `${messageFontSize}px Arial`; // Message font
+    const messageY = titleY + titleFontSize + 10; // Position message below title
+    ctx.fillText(message, titleX, messageY);
+
+    // Draw the subtext below the message
+    ctx.font = `${subTextFontSize}px Arial`; // Subtext font
+    const subTextY = messageY + messageFontSize + 10; // Position subtext below message
+    ctx.fillText(subText, titleX, subTextY);
 }
 
 
@@ -751,6 +875,9 @@ function drawCityNamesOnCanvas() {
 function updateCityNames() {
     drawCityNamesOnCanvas(); // Directly call the drawing function
 }
+
+
+
 
 
 // Toggle visibility of city names
@@ -765,7 +892,7 @@ document.getElementById('toggleCityNames').addEventListener('click', () => {
 
 document.getElementById('generate-btn').addEventListener('click', generateMap);
 
-    function generateMap() {
+function generateMap() {
         'use strict';
 
         // Get user-defined values for width, height, and DPI
@@ -811,13 +938,21 @@ document.getElementById('generate-btn').addEventListener('click', generateMap);
 
     // Create a hidden map container for rendering the high-resolution map
     const hiddenMapContainer = document.createElement('div');
-    hiddenMapContainer.style.width = pixelWidth + 'px';
-    hiddenMapContainer.style.height = pixelHeight + 'px';
-    hiddenMapContainer.style.position = 'absolute';   // Prevent affecting page layout
-    hiddenMapContainer.style.top = '-9999px';         // Move it out of the viewport
-    hiddenMapContainer.style.left = '-9999px';        // Move it out of the viewport
-    hiddenMapContainer.style.clip = 'rect(0, 0, 0, 0)';  // Ensure it's fully clipped
-    document.body.appendChild(hiddenMapContainer);
+hiddenMapContainer.style.width = pixelWidth + 'px';
+hiddenMapContainer.style.height = pixelHeight + 'px';
+hiddenMapContainer.style.position = 'absolute';   // Prevent affecting page layout
+hiddenMapContainer.style.top = '-9999px';         // Move it out of the viewport
+hiddenMapContainer.style.left = '-9999px';        // Move it out of the viewport
+hiddenMapContainer.style.clip = 'rect(0, 0, 0, 0)';  // Ensure it's fully clipped
+document.body.appendChild(hiddenMapContainer);
+
+// Create a canvas element
+const hiddenCanvas = document.createElement('canvas');
+hiddenCanvas.width = pixelWidth*3;
+hiddenCanvas.height = pixelHeight*3;
+
+// Append the canvas to the hidden map container
+hiddenMapContainer.appendChild(hiddenCanvas);
 
     // Initialize a new Mapbox map in the hidden container
     const printMap = new mapboxgl.Map({
@@ -833,8 +968,21 @@ document.getElementById('generate-btn').addEventListener('click', generateMap);
 
     // Wait until the map finishes loading before exporting
     printMap.once('load', function () {
+  
+
+ const hiddenCtx = hiddenCanvas.getContext('2d');
+
+// Get the original canvas
+const originalCanvas = printMap.getCanvas();
+
+// Draw the original canvas onto the hidden canvas
+hiddenCtx.drawImage(originalCanvas, 0, 0);
+
+printtext(hiddenCtx);
+        
+
         if (format === 'png') {
-            printMap.getCanvas().toBlob(function (blob) {
+            hiddenCanvas.toBlob(function (blob) {
                 // Download the PNG
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
@@ -855,7 +1003,7 @@ document.getElementById('generate-btn').addEventListener('click', generateMap);
                 format: [pixelWidth, pixelHeight]
             });
 
-            pdf.addImage(printMap.getCanvas().toDataURL('image/png'), 'PNG', 0, 0, pixelWidth, pixelHeight);
+            pdf.addImage(hiddenCanvas.toDataURL('image/png'), 'PNG', 0, 0, pixelWidth, pixelHeight);
             pdf.save('map.pdf');
 
             // Clean up
@@ -867,8 +1015,6 @@ document.getElementById('generate-btn').addEventListener('click', generateMap);
         printMap.remove();
     });
 }
-
-
 
 
         </script>
