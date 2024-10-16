@@ -202,17 +202,6 @@
       </div>
     </div>
   </div>
-
-  <!-- Row 3 -->
-  <div class="flex space-x-4 mb-4">
-    <!-- Text Color -->
-    <div class="w-full">
-      <p class="dropdown-text text-gray-600">Text Color:</p>
-      <div class="flex mt-1">
-        <input type="color" id="textColor" class="w-8 h-8 border rounded" onchange="updateTextColor(this.value)">
-      </div>
-    </div>
-  </div>
 </div>
 
 
@@ -228,8 +217,33 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>                 Text 
               </button>
+
+
+              
               
               <div id="dropdown3" class="hidden pl-4">
+                <div class="w-full flex items-center justify-between mt-4">
+                  <!-- Text Color Picker -->
+                  <div class="flex items-center">
+                    <p class="dropdown-text text-gray-600 mr-3">Text Color:</p>
+                    <input type="color" id="textColor" class="w-8 h-8 border rounded" onchange="updateTextColor(this.value)">
+                  </div>
+                
+                  <div class="flex items-center">
+                    <label for="toggleCityNames" class="dropdown-text mr-3 text-gray-700">Hide Text</label>
+                    <div class="relative">
+                      <!-- Switch Input -->
+                      <input type="checkbox" id="toggleCityNames" class="peer appearance-none w-10 h-5 bg-gray-300 rounded-full cursor-pointer transition duration-200 focus:outline-none checked:bg-[#cca385]" />
+                  
+                      <!-- Circle inside the switch (Slider) -->
+                      <span class="absolute left-1 top-0.5 w-4 h-4 bg-white rounded-full transition-transform duration-200 ease-in-out transform peer-checked:translate-x-4 pointer-events-none"></span>
+                    </div>
+                  </div>
+                  
+                  
+                </div>
+                
+              
                 <!-- Title Input Box -->
                 <div class="mt-2 mb-4">
                   <label for="titleInput" class="dropdown-text text-gray-600">Title:</label>
@@ -249,35 +263,56 @@
                 </div>
               </div>
             </div>
+
             <div class="dropdown">
               <button class="w-full text-left bg-[#f9f9f9] p-3 rounded-lg hover:bg-[#e5e5e5] focus:outline-none flex items-center dropdown-text" onclick="toggleDropdown('dropdown4', this)">
                 <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 w-5 h-5 text-[#cca385] arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>              Dropdown 4
+                </svg>
+                Size
               </button>
-              <div id="dropdown4" class="hidden pl-4"><button id="toggleCityNames" >
-                Toggle City Names
-            </button>
-            <br>
             
-            <label for="widthInput">Width (inches):</label>
-<input type="number" id="widthInput" value="8" step="0.1">
-<label for="heightInput">Height (inches):</label>
-<input type="number" id="heightInput" value="6" step="0.1">
-<label for="dpiInput">DPI:</label>
-<input type="number" id="dpiInput" value="300">
-<label for="outputOptions">Output format:</label>
-<select id="outputOptions">
-    <option value="png">PNG</option>
-    <option value="pdf">PDF</option>
-</select>
-
-<!-- Button to trigger map export -->
-<button id="generate-btn">Generate Map</button>
-                
-
+              <div id="dropdown4" class="hidden pl-4 mt-2">
+             
+                <!-- Size Selection Boxes -->
+                <div class="mt-4 flex space-x-4">
+                  <button class="w-24 h-16 bg-gray-200 border rounded-lg flex items-center justify-center hover:bg-gray-300 focus:bg-gray-300 focus:outline-none" onclick="setSize(24, 18)">
+                    24x18
+                  </button>
+                  <button class="w-24 h-16 bg-gray-200 border rounded-lg flex items-center justify-center hover:bg-gray-300 focus:bg-gray-300 focus:outline-none" onclick="setSize(18, 12)">
+                    18x12
+                  </button>
+                </div>
+            
+                <!-- Hidden Inputs for DPI, Width, Height -->
+                <div class="hidden">
+                  <label for="widthInput">Width (inches):</label>
+                  <input type="number" id="widthInput" value="8" step="0.1">
+                  <label for="heightInput">Height (inches):</label>
+                  <input type="number" id="heightInput" value="6" step="0.1">
+                  <label for="dpiInput">DPI:</label>
+                  <input type="number" id="dpiInput" value="300">
+                </div>
+            
+                <!-- Output Format Dropdown -->
+                <div class="mt-4">
+                  <label for="outputOptions" class="block text-gray-600">Output format:</label>
+                  <select id="outputOptions" class="p-2 border rounded w-full focus:outline-none">
+                    <option value="png">PNG</option>
+                    <option value="pdf">PDF</option>
+                  </select>
+                </div>
+                <div class="flex justify-center space-x-4 my-6">
+                  <button id="generate-btn" class="bg-[#cca385] text-white px-6 py-1 rounded w-full"> Print</button>
+                </div>
+                 
+               
               </div>
             </div>
+            
+
+
+
           </div>
         </div>
         <div id="mapWrapper" class="flex-1 bg-gray-200 ml-64 relative">
@@ -847,7 +882,7 @@ window.addEventListener('resize', resizeCanvas);
 
 
 function printtext(ctx) {
-    
+  if (displayCityNames==false){return}
 
     // Get all location input fields
     const locationRows = document.querySelectorAll('#locationsContainer > div');
@@ -934,10 +969,12 @@ subTextInput.addEventListener('input', drawCityNamesOnCanvas);
 
 
 // Function to draw city names on the canvas
-function drawCityNamesOnCanvas() {
+function drawCityNamesOnCanvas(textColor = themeColors[selectedTheme]) {
+
+
+  if (displayCityNames==false){return}
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous drawings
 
-    const textColor = themeColors[selectedTheme]; // Get color based on selected theme
     const fontSize = 14; // Set the font size for city names
     const lineHeight = 20; // Line height between text entries
     ctx.fillStyle = textColor; // Set text color
@@ -1040,7 +1077,7 @@ function updateRouteColor(color){
 }
 
 function updateTextColor(color){
-  map.setPaintProperty('circle-markers', 'circle-stroke-color', color);
+drawCityNamesOnCanvas(color);
 }
 function updateMarkerColor(color){
   map.setPaintProperty('circle-markers', 'circle-stroke-color', color);
