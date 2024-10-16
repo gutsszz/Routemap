@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Travel Route Planner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400&display=swap" rel="stylesheet">
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.js"></script>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .transition-transform {
+      transition: transform 0.3s ease;
+    }
+    .dropdown-text {
+      font-family: 'Lora', sans-serif;
+      font-size: 14px;
+    }
+    .arrow {
+      font-family: 'Lora', Arial, sans-serif; /* Add fallbacks */
+
+      transition: transform 0.3s ease;
+    }
+    .arrow-down {
+      transform: rotate(90deg);
+    }
+    
+
+    /* Custom scrollbar styles */
+::-webkit-scrollbar {
+  width: 6px; /* Reduced width */
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Light gray track */
+  border-radius: 10px; /* Rounded corners */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cca385; /* Light brown thumb */
+  border-radius: 10px; /* Rounded corners */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #b59c74; /* Darker shade on hover */
+}
+
+
+
+  /* Media query for smaller screens */
+  @media (max-width: 768px) {
+      /* Make sidebar cover the entire screen */
+      #sidebar {
+        width: 100%;
+        height: 100%;
+        z-index: 10;
+      }
+
+      /* Hide large map and show preview on top of sidebar */
+      #mapWrapper {
+        display: none;
+      }
+
+      #previewContainer {
+        display: block;
+        width: 80vw;
+        height: 60vw;
+        top: 70%;
+        left: 15%;
+        right: 5%;
+        z-index: 50;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-100">
+
+  <!-- Top Bar -->
+  <div class="w-full bg-white h-16 flex items-center justify-between px-4 shadow-lg z-10 fixed top-0">
+    <button id="toggleSidebar" class="text-[#cca385] text-2xl">&#9776;</button>
+    <div class="text-2xl font-semibold text-[#cca385]">Route Map</div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="flex pt-16 h-screen">
+    
+    <!-- Sliding Bar -->
+    <div id="sidebar" class="w-80 h-screen bg-white shadow-md p-4  fixed z-20">
+      
+      
+      <!-- Dropdown Menus -->
+      <div class="space-y-4">
+        <div class="dropdown border-b border-gray-200">
+          <button class="w-full text-left bg-[#f9f9f9] p-3 rounded-lg hover:bg-[#e5e5e5] focus:outline-none flex items-center dropdown-text" onclick="toggleDropdown('dropdown1', this)">
+            <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 w-5 h-5 text-[#cca385] arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>                 Places
+          </button>
+          <div id="dropdown1" class="hidden pl-4">
+            <!-- Scrollable container for inputs -->
+            <div id="locationsContainer" class="flex flex-col space-y-2 max-h-40 overflow-y-auto mt-2 pr-2">
+
+              <!-- First input row -->
+              <div class="flex items-center space-x-2">
+                <span class="dropdown-text">1.</span>
+                <input type="text" placeholder="Enter place" class="border p-2 rounded w-full ml-2" id="coordinatesInput1">
+                <span class="remove-btn" onclick="removeLocation(this)"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-black cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                </span>
+              </div>
+            </div>
+            <!-- Add button below inputs -->
+            <div class="flex justify-center">
+              <button onclick="addLocation()" class="bg-[#cca385] text-white px-10 py-1 rounded mt-2 mb-4">Add</button>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="dropdown border-b border-gray-200">
+            <button class="w-full text-left bg-[#f9f9f9] p-3 rounded-lg hover:bg-[#e5e5e5] focus:outline-none flex items-center dropdown-text" onclick="toggleDropdown('dropdown2', this)">
+              <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 w-5 h-5 text-[#cca385] arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>                 Theme
+            </button>
+            <div id="dropdown2" class="hidden pl-4">
+              <div class="flex space-x-4 mt-2 mb-4">
+                <div class="w-12 h-12 bg-blue-300 flex items-center justify-center border-4 border-transparent hover:border-[#cca385] theme-container" onclick="selectTheme('blue')">
+                  <div class="w-6 h-6 bg-blue-700 rounded-full"></div>
+                </div>
+                <div class="w-12 h-12 bg-green-300 flex items-center justify-center border-4 border-transparent hover:border-[#cca385] theme-container" onclick="selectTheme('green')">
+                  <div class="w-6 h-6 bg-green-700 rounded-full"></div>
+                </div>
+                <div class="w-12 h-12 bg-red-300 flex items-center justify-center border-4 border-transparent hover:border-[#cca385] theme-container" onclick="selectTheme('red')">
+                  <div class="w-6 h-6 bg-red-700 rounded-full"></div>
+                </div>
+                <div class="w-12 h-12 bg-yellow-300 flex items-center justify-center border-4 border-transparent hover:border-[#cca385] theme-container" onclick="selectTheme('yellow')">
+                  <div class="w-6 h-6 bg-yellow-700 rounded-full"></div>
+                </div>
+              </div>
+              <div class="flex space-x-4 mb-4">
+                <div class="w-12 h-12 bg-purple-300 flex items-center justify-center border-4 border-transparent hover:border-[#cca385] theme-container" onclick="selectTheme('purple')">
+                  <div class="w-6 h-6 bg-purple-700 rounded-full"></div>
+                </div>
+                <div class="w-12 h-12 bg-orange-300 flex items-center justify-center border-4 border-transparent hover:border-[#cca385] theme-container" onclick="selectTheme('orange')">
+                  <div class="w-6 h-6 bg-orange-700 rounded-full"></div>
+                </div>
+                <div class="w-12 h-12 bg-pink-300 flex items-center justify-center border-4 border-transparent hover:border-[#cca385] theme-container" onclick="selectTheme('pink')">
+                  <div class="w-6 h-6 bg-pink-700 rounded-full"></div>
+                </div>
+                <div class="w-12 h-12 bg-gray-300 flex items-center justify-center border-4 border-transparent hover:border-[#cca385] theme-container" onclick="selectTheme('gray'); showColorOptions()">
+                  <div class="w-6 h-6 bg-gray-700 rounded-full"></div>
+                </div>
+              </div>
+              
+              <!-- Color Options Section -->
+              <div id="customThemeDropdown" class="hidden pl-4 mt-2">
+                <div class="mt-2 mb-4">
+                  <p class="dropdown-text text-gray-600">Land Color:</p>
+                  <div class="flex space-x-2 mt-1">
+                    <input type="color" id="landColor" class="border rounded" onchange="updateLandColor(this.value)">
+                  </div>
+                </div>
+                <div class="mt-2 mb-4">
+                  <p class="dropdown-text text-gray-600">Water Color:</p>
+                  <div class="flex space-x-2 mt-1">
+                    <input type="color" id="waterColor" class="border rounded" onchange="updateWaterColor(this.value)">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+                    
+
+
+        
+        <div class="dropdown border-b border-gray-200">
+          <button class="w-full text-left bg-[#f9f9f9] p-3 rounded-lg hover:bg-[#e5e5e5] focus:outline-none flex items-center dropdown-text" onclick="toggleDropdown('dropdown3', this)">
+            <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 w-5 h-5 text-[#cca385] arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>                 Text 
+          </button>
+          
+          <div id="dropdown3" class="hidden pl-4">
+            <!-- Title Input Box -->
+            <div class="mt-2 mb-4">
+              <label for="titleInput" class="dropdown-text text-gray-600">Title:</label>
+              <input type="text" id="titleInput" placeholder="Enter a title" class="border p-2 rounded w-full mt-1">
+            </div>
+            
+            <!-- Text Message Box -->
+            <div class="mt-4 mb-4">
+              <label for="messageInput" class="dropdown-text text-gray-600">Text:</label>
+              <textarea id="messageInput" placeholder="Enter your text" class="border p-2 rounded w-full mt-1" rows="4"></textarea>
+            </div>
+            
+            <!-- Sub-Text Message Box -->
+            <div class="mt-4 mb-4">
+              <label for="subTextInput" class="dropdown-text text-gray-600">Sub-Text:</label>
+              <textarea id="subTextInput" placeholder="Enter your sub-text" class="border p-2 rounded w-full mt-1" rows="3"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="dropdown">
+          <button class="w-full text-left bg-[#f9f9f9] p-3 rounded-lg hover:bg-[#e5e5e5] focus:outline-none flex items-center dropdown-text" onclick="toggleDropdown('dropdown4', this)">
+            <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 w-5 h-5 text-[#cca385] arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>              Dropdown 4
+          </button>
+          <div id="dropdown4" class="hidden pl-4">
+            <p class="text-gray-600 dropdown-text">Option 1</p>
+            <p class="text-gray-600 dropdown-text">Option 2</p>
+            <p class="text-gray-600 dropdown-text">Option 3</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="mapWrapper" class="flex-1 bg-gray-200 ml-64 relative">
+      <div id="mapContainer" class="absolute top-0 bottom-0 left-0 right-0 m-auto" style="width: 60%; aspect-ratio: 4 / 3; background-color: white; box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2); z-index: 10;">
+        <div id="map" class="flex items-center justify-center w-full h-full text-gray-500">
+          <!-- Map will appear here -->
+        </div>
+      </div>
+    </div>
+
+<!-- Preview Container for smaller screens -->
+<div id="previewContainer" class="hidden bg-white fixed p-4 shadow-xl" style="z-index: 50;">
+  <!-- Semi-transparent background -->
+  <div class="absolute inset-0 bg-white opacity-80"></div>
+  
+  <!-- Map content above the background -->
+  <div id="previewMap" class="relative flex items-center justify-center w-full h-full text-gray-500">
+    
+  </div>
+</div>
+
+</div>
+  
+
+  <script>
+
+mapboxgl.accessToken = 'pk.eyJ1IjoidGFsaGF3YXFxYXMxNCIsImEiOiJjbHBreHhscWEwMWU4MnFyenU3ODdmeTdsIn0.8IlEgMNGcbx806t363hDJg';
+    let mapContainer = document.getElementById('mapContainer');
+    let mapElement = document.getElementById('map');
+    let previewContainer = document.getElementById('previewContainer');
+    let previewMapElement = document.getElementById('previewMap');
+
+const map = new mapboxgl.Map({
+container: 'map',
+
+style: 'mapbox://styles/talhawaqqas14/clv3x1c2t00f601qp5mzd3npx',
+zoom: 5.5,
+center: [30, 50],
+
+});
+
+
+
+function moveMapToPreview() {
+      if (window.innerWidth <= 768) {
+        // Move map to preview container
+        if (!previewMapElement.contains(mapElement)) {
+          previewMapElement.appendChild(mapElement);
+          map.resize(); // Ensure the map resizes correctly in the smaller container
+        }
+      } else {
+        // Move map back to the main container
+        if (!mapContainer.contains(mapElement)) {
+          mapContainer.appendChild(mapElement);
+          map.resize(); // Resize map back in the larger container
+        }
+      }
+    }
+
+    // Call the function initially
+    moveMapToPreview();
+
+    // Adjust on window resize
+    window.addEventListener('resize', moveMapToPreview);
+
+
+    // Toggling the sidebar
+    const toggleSidebar = document.getElementById('toggleSidebar');
+    const sidebar = document.getElementById('sidebar');
+
+    toggleSidebar.addEventListener('click', () => {
+      sidebar.classList.toggle('-translate-x-full');
+    });
+
+    // Function to toggle dropdowns
+   // Function to toggle dropdowns
+function toggleDropdown(dropdownId, button) {
+const dropdowns = document.querySelectorAll('.dropdown > div');
+const arrows = document.querySelectorAll('.arrow');
+
+// Close all other dropdowns
+dropdowns.forEach((dropdown) => {
+if (dropdown.id !== dropdownId) {
+  dropdown.classList.add('hidden'); // Close other dropdowns
+}
+});
+
+// Reset all arrows
+arrows.forEach((arrow) => {
+if (!dropdownId.includes(arrow.closest('.dropdown').querySelector('div').id)) {
+  arrow.classList.remove('arrow-down'); // Reset other arrows
+}
+});
+
+// Toggle the clicked dropdown and arrow
+const dropdown = document.getElementById(dropdownId);
+const arrow = button.querySelector('.arrow');
+dropdown.classList.toggle('hidden');
+arrow.classList.toggle('arrow-down');
+}
+
+
+    // Function to remove a location input
+    function removeLocation(element) {
+      const locationsContainer = document.getElementById('locationsContainer');
+      const locationRows = locationsContainer.querySelectorAll('div');
+      if (locationRows.length > 1) { // Ensure at least one input remains
+        element.parentElement.remove();
+        updateIndexes();
+      }
+    }
+
+    // Function to update indexes after adding/removing
+    function updateIndexes() {
+      const locationRows = document.querySelectorAll('#locationsContainer > div');
+      locationRows.forEach((row, index) => {
+        row.querySelector('.dropdown-text').textContent = `${index + 1}.`;
+      });
+    }
+
+  
+// Function to add a new location input
+function addLocation() {
+const locationsContainer = document.getElementById('locationsContainer');
+const locationCount = locationsContainer.querySelectorAll('div').length + 1;
+
+const newLocation = document.createElement('div');
+newLocation.className = 'flex items-center space-x-2'; // Add consistent flex layout
+
+newLocation.innerHTML = `
+<span class="dropdown-text">${locationCount}.</span>
+<input type="text" placeholder="Enter coordinates (lat,lng)" class="border p-2 rounded w-full"> <!-- Make sure input takes full width -->
+<span class="remove-btn" onclick="removeLocation(this)">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-black cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+  </svg>
+</span>`;
+
+locationsContainer.appendChild(newLocation);
+updateIndexes();
+
+// Scroll to the bottom of the container
+locationsContainer.scrollTop = locationsContainer.scrollHeight;
+}
+
+
+
+function selectTheme(theme) {
+    // Remove selected class from all containers
+    const containers = document.querySelectorAll('.theme-container');
+    containers.forEach(container => {
+      container.classList.remove('border-[#cca385]', 'border-4');
+    });
+
+    // Add selected class to the clicked container
+    const selectedContainer = document.querySelector(`.theme-container[onclick*="${theme}"]`);
+    selectedContainer.classList.add('border-[#cca385]', 'border-4'); // Set thicker border
+  }
+  function updateLandColor(color) {
+    // Update the land color in the Mapbox style
+    const landLayerId = 'land'; // Adjust according to your layer ID
+    map.setPaintProperty(landLayerId, 'background-color', color);
+}
+
+function updateWaterColor(color) {
+    // Update the water color in the Mapbox style
+    const waterLayerId = 'water'; // Adjust according to your layer ID
+    map.setPaintProperty(water, 'fill-color', color);
+}
+
+  </script>
+</body>
+</html>

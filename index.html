@@ -128,7 +128,6 @@
 
 
 
-
             <div class="dropdown border-b border-gray-200">
               <button class="w-full text-left bg-[#f9f9f9] p-3 rounded-lg hover:bg-[#e5e5e5] focus:outline-none flex items-center dropdown-text" onclick="toggleDropdown('dropdown2', this)">
                 <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 w-5 h-5 text-[#cca385] arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -160,12 +159,66 @@
                   <div class="w-12 h-12 bg-pink-300 flex items-center justify-center border-4 border-transparent hover:border-[#cca385] theme-container" onclick="selectTheme('pink')">
                     <div class="w-6 h-6 bg-pink-700 rounded-full"></div>
                   </div>
-                  <div class="w-12 h-12 bg-gray-300 flex items-center justify-center border-4 border-transparent hover:border-[#cca385] theme-container" onclick="selectTheme('gray')">
+                  <div class="w-12 h-12 bg-gray-300 flex items-center justify-center border-4 border-transparent hover:border-[#cca385] theme-container" onclick="showColorOptions();selectTheme('gray');">
                     <div class="w-6 h-6 bg-gray-700 rounded-full"></div>
                   </div>
                 </div>
+                
+                
+                <!-- Color Options Section -->
+<div id="customThemeDropdown" class="hidden pl-4 mt-2">
+  <!-- Row 1 -->
+  <div class="flex space-x-4 mb-4">
+    <!-- Land Color -->
+    <div class="w-full">
+      <p class="dropdown-text text-gray-600">Land Color:</p>
+      <div class="flex mt-1">
+        <input type="color" id="landColor" class="w-8 h-8  border rounded" onchange="updateLandColor(this.value)">
+      </div>
+    </div>
+    <!-- Water Color -->
+    <div class="w-full">
+      <p class="dropdown-text text-gray-600">Water Color:</p>
+      <div class="flex mt-1">
+        <input type="color" id="waterColor" class="w-8 h-8  border rounded" onchange="updateWaterColor(this.value)">
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 2 -->
+  <div class="flex space-x-4 mb-4">
+    <!-- Route Color -->
+    <div class="w-full">
+      <p class="dropdown-text text-gray-600">Route Color:</p>
+      <div class="flex mt-1">
+        <input type="color" id="routeColor" class="w-8 h-8  border rounded" onchange="updateRouteColor(this.value)">
+      </div>
+    </div>
+    <!-- Marker Color -->
+    <div class="w-full">
+      <p class="dropdown-text text-gray-600">Marker Color:</p>
+      <div class="flex mt-1">
+        <input type="color" id="markerColor" class="w-8 h-8  border rounded" onchange="updateMarkerColor(this.value)">
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 3 -->
+  <div class="flex space-x-4 mb-4">
+    <!-- Text Color -->
+    <div class="w-full">
+      <p class="dropdown-text text-gray-600">Text Color:</p>
+      <div class="flex mt-1">
+        <input type="color" id="textColor" class="w-8 h-8 border rounded" onchange="updateTextColor(this.value)">
+      </div>
+    </div>
+  </div>
+</div>
+
+
               </div>
             </div>
+            
 
 
             
@@ -295,15 +348,7 @@
           window.addEventListener('resize', moveMapToPreview);
   
   
-          // Toggling the sidebar
-          const toggleSidebar = document.getElementById('toggleSidebar');
-          const sidebar = document.getElementById('sidebar');
-  
-          toggleSidebar.addEventListener('click', () => {
-            sidebar.classList.toggle('-translate-x-full');
-          });
-  
-          // Function to toggle dropdowns
+        
          // Function to toggle dropdowns
   function toggleDropdown(dropdownId, button) {
     const dropdowns = document.querySelectorAll('.dropdown > div');
@@ -342,9 +387,17 @@
             markers.splice(indexToRemove, 1); // Remove marker from the markers array
         }
 
+        // Remove the point from GeoJSON data
+        geojsonData.features.splice(indexToRemove, 1); // Remove the feature from the GeoJSON
+
+        // Update the GeoJSON source on the map
+        if (map.getSource('markers')) {
+            map.getSource('markers').setData(geojsonData); // Refresh the source data with the updated GeoJSON
+        }
+
         // Remove the location container from the DOM
         element.parentElement.remove();
-        updateIndexes();
+        updateIndexes(); // Update the index numbers for the remaining locations
     } else if (locationRows.length === 1) {
         // Clear the last remaining container, but don't remove it
         const inputField = locationRows[0].querySelector('input');
@@ -359,6 +412,14 @@
         // Clear stored coordinates from the dataset
         locationRows[0].removeAttribute('data-lat');
         locationRows[0].removeAttribute('data-lng');
+
+        // Clear the GeoJSON features array
+        geojsonData.features = [];
+
+        // Update the GeoJSON source on the map
+        if (map.getSource('markers')) {
+            map.getSource('markers').setData(geojsonData); // Refresh the source data with the cleared GeoJSON
+        }
     }
 
     // Remove the route line if it exists
@@ -379,15 +440,14 @@
     updateCityNames();
 }
 
-  
-  // Function to update indexes after adding/removing locations
-  function updateIndexes() {
+// Function to update indexes after adding/removing locations
+function updateIndexes() {
     const locationRows = document.querySelectorAll('#locationsContainer > div');
     locationRows.forEach((row, index) => {
-      row.querySelector('.dropdown-text').textContent = `${index + 1}.`; // Update the index number
+        row.querySelector('.dropdown-text').textContent = `${index + 1}.`; // Update the index number
     });
-  }
-  
+}
+
         
     // Function to add a new location input
     function addLocation() {
@@ -423,71 +483,88 @@ addLocation();
 
   let currentRouteData = null; // To store route data
 
-function selectTheme(theme) {
-  selectedTheme = theme; // Update the global theme selection
-  
-  // Save the current route data (if it exists) before changing the theme
-  if (map.getSource('route')) {
-    currentRouteData = map.getSource('route')._data; // Save the current route GeoJSON data
-  }
-
-  // Update map style based on the selected theme
-  const styles = {
-    blue: 'mapbox://styles/talhawaqqas14/cm1s96dl200yw01qvet4c70x3',
-    red: 'mapbox://styles/talhawaqqas14/your-red-style-id',
-    yellow: 'mapbox://styles/talhawaqqas14/your-yellow-style-id',
-    purple: 'mapbox://styles/talhawaqqas14/your-purple-style-id',
-    orange: 'mapbox://styles/talhawaqqas14/your-orange-style-id',
-    pink: 'mapbox://styles/talhawaqqas14/clv3x1c2t00f601qp5mzd3npx',
-    gray: 'mapbox://styles/talhawaqqas14/your-gray-style-id'
-  };
-
-  if (styles[theme]) {
-    map.setStyle(styles[theme]); // Change the map style
-  }
-
-  map.on('style.load', () => {
-    // Re-add the route to the map after the style is reloaded
-    if (currentRouteData) {
-      map.addSource('route', {
-        type: 'geojson',
-        data: currentRouteData // Use the stored route data
-      });
-
-      map.addLayer({
-        id: 'route',
-        type: 'line',
-        source: 'route',
-        layout: {
-          'line-join': 'round',
-          'line-cap': 'round'
-        },
-        paint: {
-          'line-color': routeColors[selectedTheme], // Dynamic route color based on theme
-          'line-width': 4
-        }
-      });
+  function selectTheme(theme) {
+    
+    if(theme==selectedTheme){return};
+    selectedTheme = theme; // Update the global theme selection
+    
+    // Save the current route data (if it exists) before changing the theme
+    if (map.getSource('route')) {
+        currentRouteData = map.getSource('route')._data; // Save the current route GeoJSON data
     }
 
-    // Re-add markers after the style is reloaded
-    markers.forEach((marker, index) => {
-      const coordinates = marker.getLngLat();
-      const placeName = marker.getPopup().getText();
-      marker.remove(); // Remove the old marker
-      addPointToMap([coordinates.lng, coordinates.lat], placeName, index); // Re-add the marker with the new color
+    // Update map style based on the selected theme
+    const styles = {
+        blue: 'mapbox://styles/talhawaqqas14/cm1s96dl200yw01qvet4c70x3',
+        red: 'mapbox://styles/talhawaqqas14/your-red-style-id',
+        yellow: 'mapbox://styles/talhawaqqas14/your-yellow-style-id',
+        purple: 'mapbox://styles/talhawaqqas14/your-purple-style-id',
+        orange: 'mapbox://styles/talhawaqqas14/your-orange-style-id',
+        pink: 'mapbox://styles/talhawaqqas14/clv3x1c2t00f601qp5mzd3npx',
+        gray: 'mapbox://styles/talhawaqqas14/cm2axer5n00p101pge4b9f4mz'
+    };
+
+    if (styles[theme]) {
+        map.setStyle(styles[theme]); // Change the map style
+    }
+
+    map.on('style.load', () => {
+        // Re-add the route to the map after the style is reloaded
+        if (currentRouteData) {
+            map.addSource('route', {
+                type: 'geojson',
+                data: currentRouteData // Use the stored route data
+            });
+
+            map.addLayer({
+                id: 'route',
+                type: 'line',
+                source: 'route',
+                layout: {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                paint: {
+                    'line-color': routeColors[selectedTheme], // Dynamic route color based on theme
+                    'line-width': 4
+                }
+            });
+        }
+
+        // Re-add the circle layer to display the markers
+        if (!map.getSource('markers')) {
+            map.addSource('markers', {
+                type: 'geojson',
+                data: geojsonData // Initially empty or your existing data
+            });
+        }
+
+        if (!map.getLayer('circle-markers')) {
+            map.addLayer({
+                id: 'circle-markers',
+                type: 'circle',
+                source: 'markers',
+                paint: {
+                    'circle-radius': 6, // Size of the circle
+                    'circle-color': '#ffffff', // White background
+                    'circle-stroke-color': themeColors[selectedTheme], // Border color from theme
+                    'circle-stroke-width': 2, // Border width
+                }
+            });
+        }
     });
-  });
+    drawCityNamesOnCanvas();
+    // Update UI: Remove selected class from all containers
+    const containers = document.querySelectorAll('.theme-container');
+    containers.forEach(container => {
+        container.classList.remove('border-[#cca385]', 'border-4');
+    });
 
-  // Update UI: Remove selected class from all containers
-  const containers = document.querySelectorAll('.theme-container');
-  containers.forEach(container => {
-    container.classList.remove('border-[#cca385]', 'border-4');
-  });
-
-  // Add selected class to the clicked container
-  const selectedContainer = document.querySelector(`.theme-container[onclick*="${theme}"]`);
-  selectedContainer.classList.add('border-[#cca385]', 'border-4');
+    // Add selected class to the clicked container
+    const selectedContainer = document.querySelector(`.theme-container[onclick*="${theme}"]`);
+    selectedContainer.classList.add('border-[#cca385]', 'border-4');
 }
+
 
 
   function performGeocoding(query) {
@@ -588,42 +665,93 @@ function selectTheme(theme) {
 
 let selectedTheme = 'blue'; // Default theme
 
-// Function to add point to the map with a flat round marker
+// Define an empty GeoJSON object to store the marker points
+let geojsonData = {
+    type: 'FeatureCollection',
+    features: []
+};
+
+// Add a source and layer to the map for the markers
+map.on('load', function () {
+    // Add a GeoJSON source for markers if it doesn't exist already
+    if (!map.getSource('markers')) {
+        map.addSource('markers', {
+            type: 'geojson',
+            data: geojsonData // Initially empty
+        });
+    }
+
+    // Add a circle layer to display the markers
+    if (!map.getLayer('circle-markers')) {
+        map.addLayer({
+            id: 'circle-markers',
+            type: 'circle',
+            source: 'markers',
+            paint: {
+                'circle-radius': 6 , // Size of the circle
+                'circle-color': '#ffffff', // White background
+                'circle-stroke-color': themeColors[selectedTheme], // Border color from theme
+                'circle-stroke-width': 2, // Border width
+                
+            }
+        });
+    }
+});
+
+// Function to add a point to the GeoJSON source
 function addPointToMap(coordinates, placeName, index) {
-  // Create a custom round marker element using a div
-  const markerElement = document.createElement('div');
-  markerElement.className = 'custom-marker'; // Add a class for styling
-  markerElement.style.borderColor = themeColors[selectedTheme]; // Set the border color dynamically based on the theme
+    // Create a new feature for the GeoJSON data
+    const newFeature = {
+        type: 'Feature',
+        geometry: {
+            type: 'Point',
+            coordinates: coordinates // The coordinates of the point
+        },
+        properties: {
+            description: placeName, // Add place name for popups or other use
+            index: index // Add index to track specific markers
+        }
+    };
 
-  // CSS for flat round marker style
-  markerElement.style.width = '12px'; // Set the width of the marker to 10px
-  markerElement.style.height = '12px'; // Set the height of the marker to 10px
-  markerElement.style.borderRadius = '50%'; // Make the marker round
-  markerElement.style.border = `2px solid ${themeColors[selectedTheme]}`; // Border color from theme
-  markerElement.style.backgroundColor = '#ffffff'; // Set the background to white
-  markerElement.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.2)'; // Optional: subtle shadow for depth
-  markerElement.style.cursor = 'pointer'; // Make the marker clickable
+    // Replace the feature in the geojsonData or add a new one if it doesn't exist
+    if (geojsonData.features[index]) {
+        geojsonData.features[index] = newFeature; // Replace the existing feature
+    } else {
+        geojsonData.features.push(newFeature); // Add a new feature
+    }
 
-  // Create a new Mapbox marker using the custom round div
-  const newMarker = new mapboxgl.Marker({
-    element: markerElement, // Use the custom round div as the marker
-    anchor: 'center' // Center the marker on the coordinates
-  })
-    .setLngLat(coordinates)
-    .setPopup(new mapboxgl.Popup().setHTML(`<strong>${placeName}</strong>`)) // Optional popup with place name
-    .addTo(map);
+    // Update the GeoJSON source data on the map
+    map.getSource('markers').setData(geojsonData);
 
-  // Store the new marker in the markers array, replacing any existing marker at the same index
-  markers[index] = newMarker;
-
-  // Zoom to the selected location
-  map.flyTo({
-    center: coordinates,
-    essential: true, // This animation is considered essential with respect to prefers-reduced-motion
-    zoom: 14
-  });
+    // Fly to the new marker location
+    map.flyTo({
+        center: coordinates,
+        essential: true,
+        zoom: 14
+    });
 }
-  
+
+// Optional: Add a popup when clicking on markers in the circle layer
+map.on('click', 'circle-markers', function (e) {
+    const coordinates = e.features[0].geometry.coordinates.slice();
+    const description = e.features[0].properties.description;
+
+    // Ensure the map properly pans for popups
+    new mapboxgl.Popup()
+        .setLngLat(coordinates)
+        .setHTML(`<strong>${description}</strong>`)
+        .addTo(map);
+});
+
+// Optional: Change the cursor when hovering over markers
+map.on('mouseenter', 'circle-markers', function () {
+    map.getCanvas().style.cursor = 'pointer';
+});
+
+map.on('mouseleave', 'circle-markers', function () {
+    map.getCanvas().style.cursor = '';
+});
+
   function calculateRoute() {
     const coordinates = [];
     document.querySelectorAll('#locationsContainer > div').forEach(location => {
@@ -654,45 +782,45 @@ function addPointToMap(coordinates, placeName, index) {
       });
   }
   
-  
-  
-  
   function displayRouteOnMap(route) {
-  if (map.getSource('route')) {
-    map.removeLayer('route');
-    map.removeSource('route');
-  }
-
-  map.addSource('route', {
-    type: 'geojson',
-    data: {
-      type: 'Feature',
-      properties: {},
-      geometry: route
+    // Remove the existing route layer and source if it exists
+    if (map.getSource('route')) {
+        map.removeLayer('route');
+        map.removeSource('route');
     }
-  });
 
-  map.addLayer({
-    id: 'route',
-    type: 'line',
-    source: 'route',
-    layout: {
-      'line-join': 'round',
-      'line-cap': 'round'
-    },
-    paint: {
-      'line-color': routeColors[selectedTheme], // Dynamic route color based on theme
-      'line-width': 4
-    }
-  });
+    // Add the new route source
+    map.addSource('route', {
+        type: 'geojson',
+        data: {
+            type: 'Feature',
+            properties: {},
+            geometry: route
+        }
+    });
 
-  const bounds = new mapboxgl.LngLatBounds();
-  route.coordinates.forEach(coord => {
-    bounds.extend(coord);
-  });
-  map.fitBounds(bounds, { padding: 50 });
+    // Add the route layer
+    map.addLayer({
+        id: 'route',
+        type: 'line',
+        source: 'route',
+        layout: {
+            'line-join': 'round',
+            'line-cap': 'round'
+        },
+        paint: {
+            'line-color': routeColors[selectedTheme], // Dynamic route color based on theme
+            'line-width': 4
+        }
+    }, 'circle-markers'); // Add the route layer below the markers layer
+
+    // Fit the map bounds to the route
+    const bounds = new mapboxgl.LngLatBounds();
+    route.coordinates.forEach(coord => {
+        bounds.extend(coord);
+    });
+    map.fitBounds(bounds, { padding: 50 });
 }
-
 
 // Get the canvas element and context
 const canvas = document.getElementById('mapCanvas');
@@ -876,7 +1004,10 @@ function updateCityNames() {
     drawCityNamesOnCanvas(); // Directly call the drawing function
 }
 
-
+function showColorOptions() {
+    const colorOptionsDiv = document.getElementById('customThemeDropdown');
+    colorOptionsDiv.classList.toggle('hidden'); // Show or hide color options
+}
 
 
 
@@ -890,10 +1021,38 @@ document.getElementById('toggleCityNames').addEventListener('click', () => {
     }
 });
 
+
+
+function updateLandColor(color) {
+
+    const landLayerId = 'land';
+    map.setPaintProperty(landLayerId, 'background-color', color);
+}
+
+function updateWaterColor(color) {
+
+    const waterLayerId = 'water'; // Adjust according to your layer ID
+    map.setPaintProperty(waterLayerId, 'fill-color', color);
+}
+
+function updateRouteColor(color){
+  map.setPaintProperty('route', 'line-color', color);
+}
+
+function updateTextColor(color){
+  map.setPaintProperty('circle-markers', 'circle-stroke-color', color);
+}
+function updateMarkerColor(color){
+  map.setPaintProperty('circle-markers', 'circle-stroke-color', color);
+}
+
 document.getElementById('generate-btn').addEventListener('click', generateMap);
 
 function generateMap() {
         'use strict';
+        map.setPaintProperty('circle-markers', 'circle-radius', 20);
+        map.setPaintProperty('circle-markers', 'circle-stroke-width',5);
+        map.setPaintProperty('route', 'line-width', 9);
 
         // Get user-defined values for width, height, and DPI
         const width = Number(document.getElementById('widthInput').value);  // User input for width
@@ -916,7 +1075,9 @@ function generateMap() {
         const bearing = map.getBearing();
         const pitch = map.getPitch();
         const style = map.getStyle();
-
+        map.setPaintProperty('circle-markers', 'circle-radius', 6);
+        map.setPaintProperty('circle-markers', 'circle-stroke-width', 2);
+        map.setPaintProperty('route', 'line-width', 4);
         // Create the high-resolution map
         createPrintMap(pixelWidth, pixelHeight, dpi, format, zoom, center, bearing, pitch, style);
     }
@@ -938,21 +1099,21 @@ function generateMap() {
 
     // Create a hidden map container for rendering the high-resolution map
     const hiddenMapContainer = document.createElement('div');
-hiddenMapContainer.style.width = pixelWidth + 'px';
-hiddenMapContainer.style.height = pixelHeight + 'px';
-hiddenMapContainer.style.position = 'absolute';   // Prevent affecting page layout
-hiddenMapContainer.style.top = '-9999px';         // Move it out of the viewport
-hiddenMapContainer.style.left = '-9999px';        // Move it out of the viewport
-hiddenMapContainer.style.clip = 'rect(0, 0, 0, 0)';  // Ensure it's fully clipped
-document.body.appendChild(hiddenMapContainer);
+    hiddenMapContainer.style.width = pixelWidth + 'px';
+    hiddenMapContainer.style.height = pixelHeight + 'px';
+    hiddenMapContainer.style.position = 'absolute';   // Prevent affecting page layout
+    hiddenMapContainer.style.top = '-9999px';         // Move it out of the viewport
+    hiddenMapContainer.style.left = '-9999px';        // Move it out of the viewport
+    hiddenMapContainer.style.clip = 'rect(0, 0, 0, 0)';  // Ensure it's fully clipped
+    document.body.appendChild(hiddenMapContainer);
 
-// Create a canvas element
-const hiddenCanvas = document.createElement('canvas');
-hiddenCanvas.width = pixelWidth*3;
-hiddenCanvas.height = pixelHeight*3;
+    // Create a canvas element
+    const hiddenCanvas = document.createElement('canvas');
+    hiddenCanvas.width = pixelWidth * 3;
+    hiddenCanvas.height = pixelHeight * 3;
 
-// Append the canvas to the hidden map container
-hiddenMapContainer.appendChild(hiddenCanvas);
+    // Append the canvas to the hidden map container
+    hiddenMapContainer.appendChild(hiddenCanvas);
 
     // Initialize a new Mapbox map in the hidden container
     const printMap = new mapboxgl.Map({
@@ -968,18 +1129,20 @@ hiddenMapContainer.appendChild(hiddenCanvas);
 
     // Wait until the map finishes loading before exporting
     printMap.once('load', function () {
-  
+    
+            
 
- const hiddenCtx = hiddenCanvas.getContext('2d');
+        const hiddenCtx = hiddenCanvas.getContext('2d');
 
-// Get the original canvas
-const originalCanvas = printMap.getCanvas();
+        // Get the original canvas
+        const originalCanvas = printMap.getCanvas();
 
-// Draw the original canvas onto the hidden canvas
-hiddenCtx.drawImage(originalCanvas, 0, 0);
+        // Draw the original canvas onto the hidden canvas
+        hiddenCtx.drawImage(originalCanvas, 0, 0);
 
-printtext(hiddenCtx);
-        
+
+        // Optional: If you have text to print on the map
+        printtext(hiddenCtx);
 
         if (format === 'png') {
             hiddenCanvas.toBlob(function (blob) {
@@ -1008,14 +1171,13 @@ printtext(hiddenCtx);
 
             // Clean up
             document.body.removeChild(hiddenMapContainer);
+            hiddenCanvas.remove();
             Object.defineProperty(window, 'devicePixelRatio', { get: function () { return actualPixelRatio; } });
         }
-
-        // Remove the print map instance
+       
         printMap.remove();
     });
 }
-
 
         </script>
     </body>
