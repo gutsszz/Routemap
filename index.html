@@ -159,14 +159,14 @@
                   <div class="w-12 h-12 bg-pink-300 flex items-center justify-center border-4 border-transparent hover:border-[#cca385] theme-container" onclick="selectTheme('pink')">
                     <div class="w-6 h-6 bg-pink-700 rounded-full"></div>
                   </div>
-                  <div class="w-12 h-12 bg-gray-300 flex items-center justify-center border-4 border-transparent hover:border-[#cca385] theme-container" onclick="showColorOptions();selectTheme('gray');">
+                  <div class="w-12 h-12 bg-gray-300 flex items-center justify-center border-4 border-transparent hover:border-[#cca385] theme-container" onclick="selectTheme('gray');">
                     <div class="w-6 h-6 bg-gray-700 rounded-full"></div>
                   </div>
                 </div>
                 
                 
                 <!-- Color Options Section -->
-<div id="customThemeDropdown" class="hidden pl-4 mt-2">
+<div id="customThemeDropdown" class=" pl-4 mt-2">
   <!-- Row 1 -->
   <div class="flex space-x-4 mb-4">
     <!-- Land Color -->
@@ -559,10 +559,11 @@ addLocation();
     // Update map style based on the selected theme
     const styles = {
         blue: 'mapbox://styles/talhawaqqas14/cm1s96dl200yw01qvet4c70x3',
-        red: 'mapbox://styles/talhawaqqas14/your-red-style-id',
-        yellow: 'mapbox://styles/talhawaqqas14/your-yellow-style-id',
-        purple: 'mapbox://styles/talhawaqqas14/your-purple-style-id',
-        orange: 'mapbox://styles/talhawaqqas14/your-orange-style-id',
+        green: 'mapbox://styles/talhawaqqas14/cm2cph1pv00ts01peb9h22o6p',
+        red: 'mapbox://styles/talhawaqqas14/cm2csq97700uz01pbepp64hmd',
+        yellow: 'mapbox://styles/talhawaqqas14/cm2cs1cku00pf01pic3sq8nsq',
+        purple: 'mapbox://styles/talhawaqqas14/cm2csdiwr00yn01qvcx8d3nrc',
+        orange: 'mapbox://styles/talhawaqqas14/cm2csmkhm00ux01pbfkol7618',
         pink: 'mapbox://styles/talhawaqqas14/clv3x1c2t00f601qp5mzd3npx',
         gray: 'mapbox://styles/talhawaqqas14/cm2axer5n00p101pge4b9f4mz'
     };
@@ -706,8 +707,9 @@ addLocation();
   let markers = []; // Array to store map markers
   
   let routeColors = {
-  blue: '#566d71',  // Blue theme route color
-  red: '#ff4c4c',   // Red theme route color
+  blue: '#566d71',   // Blue theme route color
+  green: '#28a745',  // Green theme route color (added for green)
+  red: '#ff4c4c',    // Red theme route color
   yellow: '#ffc107', // Yellow theme route color
   purple: '#6f42c1', // Purple theme route color
   orange: '#fd7e14', // Orange theme route color
@@ -716,14 +718,15 @@ addLocation();
 };
 
 
-  let themeColors = {
-  blue: '#5b7373', // Blue theme color
-  red: '#ff4c4c', // Red theme color
+let themeColors = {
+  blue: '#5b7373',   // Blue theme color
+  green: '#28a745',  // Green theme color (added for green)
+  red: '#ff4c4c',    // Red theme color
   yellow: '#ffc107', // Yellow theme color
   purple: '#6f42c1', // Purple theme color
   orange: '#fd7e14', // Orange theme color
-  pink: '#e83e8c', // Pink theme color
-  gray: '#6c757d'  // Gray theme color
+  pink: '#e83e8c',   // Pink theme color
+  gray: '#6c757d'    // Gray theme color
 };
 
 let selectedTheme = 'blue'; // Default theme
@@ -913,7 +916,7 @@ function printtext(ctx, canvasWidth, canvasHeight) {
 
     // Get all location input fields
     const locationRows = document.querySelectorAll('#locationsContainer > div');
-    const textColor = themeColors[selectedTheme]; // Get color based on selected theme
+    const textColor = printtextcolor; // Get color based on selected theme
 
     // Scaling factors based on the original dimensions (7200x5400)
     const widthScale = canvasWidth / 7200;
@@ -994,11 +997,11 @@ messageInput.addEventListener('input', drawCityNamesOnCanvas);
 subTextInput.addEventListener('input', drawCityNamesOnCanvas);
 
 
-
+let printtextcolor;
 
 // Function to draw city names on the canvas
 function drawCityNamesOnCanvas(textColor = themeColors[selectedTheme]) {
-
+  printtextcolor=textColor;
 
   if (displayCityNames==false){return}
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous drawings
@@ -1069,10 +1072,6 @@ function updateCityNames() {
     drawCityNamesOnCanvas(); // Directly call the drawing function
 }
 
-function showColorOptions() {
-    const colorOptionsDiv = document.getElementById('customThemeDropdown');
-    colorOptionsDiv.classList.toggle('hidden'); // Show or hide color options
-}
 
 
 
@@ -1115,9 +1114,7 @@ document.getElementById('generate-btn').addEventListener('click', generateMap);
 
 function generateMap() {
         'use strict';
-        map.setPaintProperty('circle-markers', 'circle-radius', 20);
-        map.setPaintProperty('circle-markers', 'circle-stroke-width',5);
-        map.setPaintProperty('route', 'line-width', 9);
+       
 
         // Get user-defined values for width, height, and DPI
         let width = Number(document.getElementById('widthInput').value);  // User input for width
@@ -1134,7 +1131,9 @@ function generateMap() {
         width = 3.24;
         height = 2.24;
       }
-    } else if (format === 'png') {
+    } else if (format === 'png') { map.setPaintProperty('circle-markers', 'circle-radius', 20);
+        map.setPaintProperty('circle-markers', 'circle-stroke-width',5);
+        map.setPaintProperty('route', 'line-width', 9);
       if (printsize === 'size24x18') {
         width = 8;
         height = 6;
@@ -1267,6 +1266,7 @@ function generateMap() {
         }
        
         printMap.remove();
+        map.resize();
     });
 }
 
