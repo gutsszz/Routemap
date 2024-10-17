@@ -275,14 +275,21 @@
               <div id="dropdown4" class="hidden pl-4 mt-2">
              
                 <!-- Size Selection Boxes -->
-                <div class="mt-4 flex space-x-4">
-                  <button class="w-24 h-16 bg-gray-200 border rounded-lg flex items-center justify-center hover:bg-gray-300 focus:bg-gray-300 focus:outline-none" onclick="setSize(24, 18)">
+                <div class="mt-4 flex space-x-4" id="sizeSelector">
+                  <button 
+                    class="w-24 h-16 bg-gray-200 border rounded-lg flex items-center justify-center hover:bg-gray-300 focus:bg-gray-300 focus:outline-none" 
+                    onclick="setSize('size24x18', this)">
                     24x18
                   </button>
-                  <button class="w-24 h-16 bg-gray-200 border rounded-lg flex items-center justify-center hover:bg-gray-300 focus:bg-gray-300 focus:outline-none" onclick="setSize(18, 12)">
+                  <button 
+                    class="w-24 h-16 bg-gray-200 border rounded-lg flex items-center justify-center hover:bg-gray-300 focus:bg-gray-300 focus:outline-none" 
+                    onclick="setSize('size18x12', this)">
                     18x12
                   </button>
                 </div>
+                
+                <!-- Hidden inputs to store values -->
+                <input type="hidden" id="selectedSize" value="size24x18"> <!-- Default value -->
             
                 <!-- Hidden Inputs for DPI, Width, Height -->
                 <div class="hidden">
@@ -409,6 +416,27 @@
     dropdown.classList.toggle('hidden');
     arrow.classList.toggle('arrow-down');
   }
+
+let selectedSizeButton = null; // Variable to keep track of the selected button
+let printsize = "size24x18";
+
+  function setSize(size, button) {
+    // Update the hidden input with the selected size value (size24x18 or size18x12)
+    document.getElementById('selectedSize').value = size;
+    printsize=size;
+    // If a button was already selected, remove the special border class
+    if (selectedSizeButton) {
+      selectedSizeButton.classList.remove('border-[#cca385]', 'border-4');
+    }
+
+    // Add the special border to the newly selected button
+    button.classList.add('border-[#cca385]', 'border-4');
+
+    // Keep track of the selected button
+    selectedSizeButton = button;
+  }
+
+
   function removeLocation(element) {
     const locationsContainer = document.getElementById('locationsContainer');
     const locationRows = locationsContainer.querySelectorAll('div');
@@ -880,25 +908,29 @@ window.addEventListener('load', resizeCanvas);
 window.addEventListener('resize', resizeCanvas);
 
 
-
-function printtext(ctx) {
-  if (displayCityNames==false){return}
+function printtext(ctx, canvasWidth, canvasHeight) {
+    if (displayCityNames === false) { return; }
 
     // Get all location input fields
     const locationRows = document.querySelectorAll('#locationsContainer > div');
     const textColor = themeColors[selectedTheme]; // Get color based on selected theme
 
-    const fontSize = 140; // Set the font size to 14px (reduced from 20px)
-    const lineHeight = 180; // Line height between text entries
+    // Scaling factors based on the original dimensions (7200x5400)
+    const widthScale = canvasWidth / 7200;
+    const heightScale = canvasHeight / 5400;
+
+    // Adjusted font sizes and line heights based on scaling factors
+    const fontSize = 140 * heightScale; // Adjust font size relative to canvas height
+    const lineHeight = 180 * heightScale; // Adjust line height relative to canvas height
 
     ctx.fillStyle = textColor; // Set text color
     ctx.font = `${fontSize}px Arial`; // Set font size and style
 
-    // Start drawing from the bottom left of the canvas
-    const startY =  5200; // Position 20px from the bottom of the canvas
-    const startX = 200; // Position 20px from the left edge of the canvas
+    // Start drawing from the bottom left of the canvas (scaled for any canvas size)
+    const startY = canvasHeight - 200 * heightScale; // Adjust Y starting point relative to canvas height
+    const startX = 200 * widthScale; // Adjust X starting point relative to canvas width
 
-     // Ensure text alignment is set to 'left' for the city names
+    // Ensure text alignment is set to 'left' for the city names
     ctx.textAlign = 'left'; // Set text alignment to left for city names
     ctx.textBaseline = 'alphabetic'; // Standard text baseline for city names
 
@@ -913,25 +945,25 @@ function printtext(ctx) {
         ctx.fillText(`${index + 1}. ${cityName}`, startX, positionY);
     });
 
- // Get user input for title, message, and subtext
- const title = titleInput.value.trim() || 'Title'; // Default to 'Title' if empty
+    // Get user input for title, message, and subtext
+    const title = titleInput.value.trim() || 'Title'; // Default to 'Title' if empty
     const message = messageInput.value.trim() || 'Message'; // Default to 'Message' if empty
     const subText = subTextInput.value.trim() || 'Subtext'; // Default to 'Subtext' if empty
 
-    // Set text properties for the title, message, and subtext
-    const titleFontSize = 220; // Title font size
-    const messageFontSize = 180; // Message font size
-    const subTextFontSize = 140; // Subtext font size
+    // Adjusted font sizes for title, message, and subtext
+    const titleFontSize = 220 * heightScale; // Adjust title font size
+    const messageFontSize = 180 * heightScale; // Adjust message font size
+    const subTextFontSize = 140 * heightScale; // Adjust subtext font size
 
     // Set font and alignment for title, message, and subtext
     ctx.fillStyle = textColor; // Set the fill color to theme color
     ctx.textAlign = 'right'; // Align text to the right for title, message, subtext
     ctx.textBaseline = 'top'; // Align text to the top
 
-    // Position for text at the top-right corner
-    const margin = 200; // Margin from the edges
-    const titleX = 7000;
-    const titleY = margin;
+    // Adjusted position for text at the top-right corner
+    const margin = 200 * widthScale; // Adjust margin relative to canvas width
+    const titleX = canvasWidth - margin; // Adjust X position for title
+    const titleY = margin; // Adjust Y position for title
 
     // Draw the title at the top-right
     ctx.font = `bold ${titleFontSize}px Arial`; // Title font
@@ -939,18 +971,14 @@ function printtext(ctx) {
 
     // Draw the message below the title
     ctx.font = `${messageFontSize}px Arial`; // Message font
-    const messageY = titleY + titleFontSize + 60; // Position message below title
+    const messageY = titleY + titleFontSize + 60 * heightScale; // Adjust message Y position
     ctx.fillText(message, titleX, messageY);
 
     // Draw the subtext below the message
     ctx.font = `${subTextFontSize}px Arial`; // Subtext font
-    const subTextY = messageY + messageFontSize + 60; // Position subtext below message
+    const subTextY = messageY + messageFontSize + 60 * heightScale; // Adjust subtext Y position
     ctx.fillText(subText, titleX, subTextY);
-
-
-
 }
-
 
 
 
@@ -1092,10 +1120,31 @@ function generateMap() {
         map.setPaintProperty('route', 'line-width', 9);
 
         // Get user-defined values for width, height, and DPI
-        const width = Number(document.getElementById('widthInput').value);  // User input for width
-        const height = Number(document.getElementById('heightInput').value);  // User input for height
+        let width = Number(document.getElementById('widthInput').value);  // User input for width
+        let height = Number(document.getElementById('heightInput').value);  // User input for height
         const dpi = Number(document.getElementById('dpiInput').value);  // User input for DPI
         const format = document.getElementById('outputOptions').value === 'png' ? 'png' : 'pdf';  // Output format
+
+
+        if (format === 'pdf') {
+      if (printsize === 'size24x18') {
+        width = 4.32;
+        height = 3.24;
+      } else if (printsize === 'size18x12') {
+        width = 3.24;
+        height = 2.24;
+      }
+    } else if (format === 'png') {
+      if (printsize === 'size24x18') {
+        width = 8;
+        height = 6;
+      } else if (printsize === 'size18x12') {
+        width = 6;
+        height = 4;
+      }
+    }
+
+
 
         if (width <= 0 || height <= 0 || dpi <= 0) {
             alert("Width, height, and DPI must be positive numbers!");
@@ -1106,15 +1155,19 @@ function generateMap() {
         const pixelWidth = width * dpi;
         const pixelHeight = height * dpi;
 
+        
         // Get current map state
         const zoom = map.getZoom();
         const center = map.getCenter();
         const bearing = map.getBearing();
         const pitch = map.getPitch();
         const style = map.getStyle();
+
+
         map.setPaintProperty('circle-markers', 'circle-radius', 6);
         map.setPaintProperty('circle-markers', 'circle-stroke-width', 2);
         map.setPaintProperty('route', 'line-width', 4);
+
         // Create the high-resolution map
         createPrintMap(pixelWidth, pixelHeight, dpi, format, zoom, center, bearing, pitch, style);
     }
@@ -1179,7 +1232,7 @@ function generateMap() {
 
 
         // Optional: If you have text to print on the map
-        printtext(hiddenCtx);
+        printtext(hiddenCtx,hiddenCanvas.width,hiddenCanvas.height);
 
         if (format === 'png') {
             hiddenCanvas.toBlob(function (blob) {
@@ -1191,6 +1244,7 @@ function generateMap() {
 
                 // Clean up
                 URL.revokeObjectURL(link.href);
+                hiddenCanvas.remove();
                 document.body.removeChild(hiddenMapContainer);
                 Object.defineProperty(window, 'devicePixelRatio', { get: function () { return actualPixelRatio; } });
             });
@@ -1207,8 +1261,8 @@ function generateMap() {
             pdf.save('map.pdf');
 
             // Clean up
-            document.body.removeChild(hiddenMapContainer);
             hiddenCanvas.remove();
+            document.body.removeChild(hiddenMapContainer);
             Object.defineProperty(window, 'devicePixelRatio', { get: function () { return actualPixelRatio; } });
         }
        
