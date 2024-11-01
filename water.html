@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapbox 300 DPI Export Example (CDN)</title>
+    
+    <!-- Mapbox GL JS CSS -->
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+
+    <!-- Mapbox GL Export CSS -->
+    <link href='https://watergis.github.io/mapbox-gl-export/mapbox-gl-export.css' rel='stylesheet' />
+
+    <style>
+        /* Set map container dimensions */
+        #map {
+            width: 100%;
+            height: 500px;
+        }
+        /* Button styling */
+        #exportBtn {
+            margin: 10px;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Map container -->
+    <div id="map"></div>
+
+    <!-- Export button -->
+    <button id="exportBtn">Export Map as PNG (300 DPI)</button>
+
+    <!-- Mapbox GL JS -->
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
+
+    <!-- Mapbox GL Export JS -->
+    <script src="https://watergis.github.io/mapbox-gl-export/mapbox-gl-export.js"></script>
+
+    <script>
+        // Mapbox access token
+        mapboxgl.accessToken = 'pk.eyJ1IjoidGFsaGF3YXFxYXMxNCIsImEiOiJjbHBreHhscWEwMWU4MnFyenU3ODdmeTdsIn0.8IlEgMNGcbx806t363hDJg';
+
+        // Initialize the Mapbox map
+        const map = new mapboxgl.Map({
+            container: 'map', // HTML container ID
+            style: 'mapbox://styles/talhawaqqas14/cm1s96dl200yw01qvet4c70x3', // Map style
+            center: [0, 0], // Initial map center [lng, lat]
+            zoom: 2 // Initial map zoom level
+        });
+
+        // Wait for the map to load before enabling export
+        map.on('load', () => {
+            // Add export button functionality
+            document.getElementById('exportBtn').onclick = function() {
+                // Define the export size and DPI
+                const widthInInches = 24;  // Width in inches
+                const heightInInches = 18; // Height in inches
+                const dpi = 300;            // Set DPI to 300
+
+                // Calculate the pixel dimensions based on DPI
+                const pixelWidth = widthInInches * dpi;  // 24 inches * 300 DPI = 7200 pixels
+                const pixelHeight = heightInInches * dpi; // 18 inches * 300 DPI = 5400 pixels
+
+                // Initialize the Mapbox export control if needed
+                map.addControl(new MapboxExportControl(), 'top-right');
+
+                // Trigger the export with custom dimensions
+                map.exportMap({
+                    width: pixelWidth,      // Export width in pixels
+                    height: pixelHeight,    // Export height in pixels
+                    dpi: dpi,               // Set DPI to 300
+                    format: 'png',          // Output format (PNG)
+                    filename: 'map_24x18_300dpi'  // Filename for the export
+                }).then(() => {
+                    alert('Map exported successfully!');
+                }).catch(error => {
+                    console.error('Error exporting map:', error);
+                });
+            };
+        });
+    </script>
+
+</body>
+</html>

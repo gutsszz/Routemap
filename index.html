@@ -209,53 +209,73 @@
             </div>
             
 
-
-            
             <div class="dropdown border-b border-gray-200">
               <button class="w-full text-left bg-[#f9f9f9] p-3 rounded-lg hover:bg-[#e5e5e5] focus:outline-none flex items-center dropdown-text" onclick="toggleDropdown('dropdown3', this)">
                 <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 w-5 h-5 text-[#cca385] arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>                 Text 
+                </svg>                 
+                Text 
               </button>
-
-
               
-              
-              <div id="dropdown3" class="hidden pl-4">
-                <div class="w-full flex items-center justify-between mt-4">
-                  <!-- Text Color Picker -->
+              <div id="dropdown3" class="hidden pl-4 pr-2 overflow-y-auto" style="max-height: 300px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);"> <!-- Added styles for better appearance -->
+                
+                <!-- Alignment Option Dropdown -->
+                <div class="flex items-center mt-4 mb-3">
+                  <label for="alignmentOption" class="dropdown-text text-gray-600 mr-3">Alignment:</label>
+                  <select id="alignmentOption" class="border p-2 rounded-lg text-gray-700" onchange="updateAlignmentOption(this.value)">
+                    <option value="right">Right</option>
+                    <option value="center">Center</option>
+                    <option value="left">Left</option>
+                  </select>
+                </div>
+                
+                <!-- Font Style Option Dropdown -->
+                <div class="flex items-center mt-4 mb-3">
+                  <label for="fontStyleOption" class="dropdown-text text-gray-600 mr-3">Font Style:</label>
+                  <select id="fontStyleOption" class="border p-2 rounded-lg text-gray-700" onchange="updateFontStyleOption(this.value)">
+                    <option value="normal">Normal</option>
+                    <option value="bold">Bold</option>
+                    <option value="italic">Italic</option>
+                  </select>
+                </div>
+                
+                <!-- Font Family Option Dropdown -->
+                <div class="flex items-center mt-4 mb-3">
+                  <label for="fontFamilyOption" class="dropdown-text text-gray-600 mr-3">Font Family:</label>
+                  <select id="fontFamilyOption" class="border p-2 rounded-lg text-gray-700" onchange="updateFontFamilyOption(this.value)">
+                    <option value="Arial">Arial</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                    <option value="Courier New">Courier New</option>
+                  </select>
+                </div>
+            
+                <!-- Existing Text Color Picker and Hide Text Switch -->
+                <div class="w-full flex items-center justify-between mt-4 mb-3">
                   <div class="flex items-center">
                     <p class="dropdown-text text-gray-600 mr-3">Text Color:</p>
                     <input type="color" id="textColor" class="w-8 h-8 border rounded" onchange="updateTextColor(this.value)">
                   </div>
-                
                   <div class="flex items-center">
                     <label for="toggleCityNames" class="dropdown-text mr-3 text-gray-700">Hide Text</label>
                     <div class="relative">
-                      <!-- Switch Input -->
                       <input type="checkbox" id="toggleCityNames" class="peer appearance-none w-10 h-5 bg-gray-300 rounded-full cursor-pointer transition duration-200 focus:outline-none checked:bg-[#cca385]" />
-                  
-                      <!-- Circle inside the switch (Slider) -->
                       <span class="absolute left-1 top-0.5 w-4 h-4 bg-white rounded-full transition-transform duration-200 ease-in-out transform peer-checked:translate-x-4 pointer-events-none"></span>
                     </div>
                   </div>
-                  
-                  
                 </div>
-                
-              
+            
                 <!-- Title Input Box -->
                 <div class="mt-2 mb-4">
                   <label for="titleInput" class="dropdown-text text-gray-600">Title:</label>
                   <input type="text" id="titleInput" placeholder="Enter a title" class="border p-2 rounded w-full mt-1">
                 </div>
-                
+            
                 <!-- Text Message Box -->
                 <div class="mt-4 mb-4">
                   <label for="messageInput" class="dropdown-text text-gray-600">Text:</label>
                   <textarea id="messageInput" placeholder="Enter your text" class="border p-2 rounded w-full mt-1" rows="4"></textarea>
                 </div>
-                
+            
                 <!-- Sub-Text Message Box -->
                 <div class="mt-4 mb-4">
                   <label for="subTextInput" class="dropdown-text text-gray-600">Sub-Text:</label>
@@ -263,7 +283,7 @@
                 </div>
               </div>
             </div>
-
+                          
             <div class="dropdown">
               <button class="w-full text-left bg-[#f9f9f9] p-3 rounded-lg hover:bg-[#e5e5e5] focus:outline-none flex items-center dropdown-text" onclick="toggleDropdown('dropdown4', this)">
                 <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 w-5 h-5 text-[#cca385] arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -415,7 +435,22 @@
     const arrow = button.querySelector('.arrow');
     dropdown.classList.toggle('hidden');
     arrow.classList.toggle('arrow-down');
+
   }
+
+// Function to set default values
+function setDefaultValues() {
+    // Set default values for the input fields
+    document.getElementById('titleInput').value = 'Title';
+    document.getElementById('messageInput').value = 'Message';
+    document.getElementById('subTextInput').value = 'Subtext';
+}
+
+// Call the function when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', setDefaultValues);
+
+
+
 
 let selectedSizeButton = null; // Variable to keep track of the selected button
 let printsize = "size24x18";
@@ -522,7 +557,7 @@ function updateIndexes() {
 
     newLocation.innerHTML = `
         <span class="dropdown-text">${locationCount}.</span>
-        <input type="text" placeholder="Enter coordinates (lat,lng)" class="border p-2 rounded w-full"> 
+        <input type="text" placeholder="Enter City's name" class="border p-2 rounded w-full"> 
         <span class="remove-btn" onclick="removeLocation(this)">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-black cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -911,6 +946,16 @@ window.addEventListener('load', resizeCanvas);
 window.addEventListener('resize', resizeCanvas);
 
 
+let printtextcolor;
+
+// Initialize global variables
+let alignmentOption = 'right';
+let fontStyleOption = 'normal';
+let fontFamilyOption = 'Arial';
+
+
+
+
 function printtext(ctx, canvasWidth, canvasHeight) {
     if (displayCityNames === false) { return; }
 
@@ -922,20 +967,18 @@ function printtext(ctx, canvasWidth, canvasHeight) {
     const widthScale = canvasWidth / 7200;
     const heightScale = canvasHeight / 5400;
 
-    // Adjusted font sizes and line heights based on scaling factors
+    // Adjusted font sizes and line heights based on scaling factors for city names
     const fontSize = 140 * heightScale; // Adjust font size relative to canvas height
     const lineHeight = 180 * heightScale; // Adjust line height relative to canvas height
 
     ctx.fillStyle = textColor; // Set text color
-    ctx.font = `${fontSize}px Arial`; // Set font size and style
-
-    // Start drawing from the bottom left of the canvas (scaled for any canvas size)
-    const startY = canvasHeight - 200 * heightScale; // Adjust Y starting point relative to canvas height
-    const startX = 200 * widthScale; // Adjust X starting point relative to canvas width
-
-    // Ensure text alignment is set to 'left' for the city names
-    ctx.textAlign = 'left'; // Set text alignment to left for city names
+    ctx.font = `${fontSize}px Arial`; // Keep font fixed for city names
+    ctx.textAlign = 'left'; // Fix alignment to the left for city names
     ctx.textBaseline = 'alphabetic'; // Standard text baseline for city names
+
+    // Start drawing city names from the bottom left of the canvas (scaled for any canvas size)
+    const startY = canvasHeight - 200 * heightScale; // Adjust Y starting point relative to canvas height
+    const startX = 200 * widthScale; // Fixed X starting point for city names
 
     // Draw city names from the bottom up
     locationRows.forEach((row, index) => {
@@ -943,46 +986,49 @@ function printtext(ctx, canvasWidth, canvasHeight) {
         const cityName = inputField.value.trim() || `City ${index + 1}`; // Default to "City X" if empty
 
         const positionY = startY - (locationRows.length - 1 - index) * lineHeight; // Calculate Y position from bottom up
-
-        // Draw the text at the calculated position
-        ctx.fillText(`${index + 1}. ${cityName}`, startX, positionY);
+        ctx.fillText(`${index + 1}. ${cityName}`, startX, positionY); // Draw city name text
     });
 
     // Get user input for title, message, and subtext
-    const title = titleInput.value.trim() || 'Title'; // Default to 'Title' if empty
-    const message = messageInput.value.trim() || 'Message'; // Default to 'Message' if empty
-    const subText = subTextInput.value.trim() || 'Subtext'; // Default to 'Subtext' if empty
+    const title = titleInput.value.trim() || ''; // Default to 'Title' if empty
+    const message = messageInput.value.trim() || ''; // Default to 'Message' if empty
+    const subText = subTextInput.value.trim() || ''; // Default to 'Subtext' if empty
 
     // Adjusted font sizes for title, message, and subtext
-    const titleFontSize = 220 * heightScale; // Adjust title font size
-    const messageFontSize = 180 * heightScale; // Adjust message font size
-    const subTextFontSize = 140 * heightScale; // Adjust subtext font size
+    const titleFontSize = 220 * heightScale;
+    const messageFontSize = 180 * heightScale;
+    const subTextFontSize = 140 * heightScale;
 
-    // Set font and alignment for title, message, and subtext
+    // Set font, style, and alignment for title, message, and subtext
+    const fontStyle = fontStyleOption || 'normal'; // Use global font style option
+    const fontFamily = fontFamilyOption || 'Arial'; // Use global font family option
+    const alignment = alignmentOption || 'right'; // Use global alignment option (default to right)
+
     ctx.fillStyle = textColor; // Set the fill color to theme color
-    ctx.textAlign = 'right'; // Align text to the right for title, message, subtext
+    ctx.textAlign = alignment; // Apply user-selected alignment for title, message, subtext
     ctx.textBaseline = 'top'; // Align text to the top
 
     // Adjusted position for text at the top-right corner
     const margin = 200 * widthScale; // Adjust margin relative to canvas width
-    const titleX = canvasWidth - margin; // Adjust X position for title
-    const titleY = margin; // Adjust Y position for title
+    const titleX = alignment === 'left' ? margin 
+                 : alignment === 'center' ? canvasWidth / 2 
+                 : canvasWidth - margin;
+    const titleY = margin;
 
     // Draw the title at the top-right
-    ctx.font = `bold ${titleFontSize}px Arial`; // Title font
+    ctx.font = `${fontStyle} bold ${titleFontSize}px ${fontFamily}`; // Title font with user-selected options
     ctx.fillText(title, titleX, titleY);
 
     // Draw the message below the title
-    ctx.font = `${messageFontSize}px Arial`; // Message font
+    ctx.font = `${fontStyle} ${messageFontSize}px ${fontFamily}`; // Message font with user-selected options
     const messageY = titleY + titleFontSize + 60 * heightScale; // Adjust message Y position
     ctx.fillText(message, titleX, messageY);
 
     // Draw the subtext below the message
-    ctx.font = `${subTextFontSize}px Arial`; // Subtext font
+    ctx.font = `${fontStyle} ${subTextFontSize}px ${fontFamily}`; // Subtext font with user-selected options
     const subTextY = messageY + messageFontSize + 60 * heightScale; // Adjust subtext Y position
     ctx.fillText(subText, titleX, subTextY);
 }
-
 
 
 // Get references to the text input fields
@@ -997,73 +1043,94 @@ messageInput.addEventListener('input', drawCityNamesOnCanvas);
 subTextInput.addEventListener('input', drawCityNamesOnCanvas);
 
 
-let printtextcolor;
 
-// Function to draw city names on the canvas
+// Functions to update each option based on user input
+function updateAlignmentOption(value) {
+  alignmentOption = value;
+  drawCityNamesOnCanvas(); // Redraw to apply changes
+}
+
+function updateFontStyleOption(value) {
+  fontStyleOption = value;
+  drawCityNamesOnCanvas(); // Redraw to apply changes
+}
+
+function updateFontFamilyOption(value) {
+  fontFamilyOption = value;
+  drawCityNamesOnCanvas(); // Redraw to apply changes
+}
+
 function drawCityNamesOnCanvas(textColor = themeColors[selectedTheme]) {
-  printtextcolor=textColor;
+  printtextcolor = textColor;
 
-  if (displayCityNames==false){return}
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous drawings
+  if (displayCityNames == false) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous drawings
 
-    const fontSize = 14; // Set the font size for city names
-    const lineHeight = 20; // Line height between text entries
-    ctx.fillStyle = textColor; // Set text color
-    ctx.font = `${fontSize}px Arial`; // Set font size and style for city names
+  const fontSize = 14; // Set the font size for city names
+  const lineHeight = 20; // Line height between text entries
+  ctx.fillStyle = textColor; // Set text color
+  ctx.font = `${fontSize}px ${fontFamilyOption}`; // Set font size and family for city names
 
-    // Start drawing city names from the bottom left of the canvas
-    const startY = canvas.height - 20; // Position 20px from the bottom of the canvas
-    const startX = 20; // Position 20px from the left edge of the canvas
+  // Start drawing city names from the bottom left of the canvas
+  const startY = canvas.height - 20; // Position 20px from the bottom of the canvas
+  const startX = 20; // Position 20px from the left edge of the canvas
 
-    // Ensure text alignment is set to 'left' for the city names
-    ctx.textAlign = 'left'; // Set text alignment to left for city names
-    ctx.textBaseline = 'alphabetic'; // Standard text baseline for city names
+  // Ensure text alignment is set to 'left' for the city names
+  ctx.textAlign = 'left'; // Set text alignment to left for city names
+  ctx.textBaseline = 'alphabetic'; // Standard text baseline for city names
 
-    // Draw city names from the bottom up
-    const locationRows = document.querySelectorAll('#locationsContainer > div');
-    locationRows.forEach((row, index) => {
-        const inputField = row.querySelector('input');
-        const cityName = inputField.value.trim() || `City ${index + 1}`; // Default to "City X" if empty
+  // Draw city names from the bottom up
+  const locationRows = document.querySelectorAll('#locationsContainer > div');
+  locationRows.forEach((row, index) => {
+    const inputField = row.querySelector('input');
+    const cityName = inputField.value.trim() || `City ${index + 1}`; // Default to "City X" if empty
 
-        const positionY = startY - (locationRows.length - 1 - index) * lineHeight; // Calculate Y position from bottom up
+    const positionY = startY - (locationRows.length - 1 - index) * lineHeight; // Calculate Y position from bottom up
 
-        // Draw the city name text at the calculated position
-        ctx.fillText(`${index + 1}. ${cityName}`, startX, positionY);
-    });
+    // Draw the city name text at the calculated position
+    ctx.fillText(`${index + 1}. ${cityName}`, startX, positionY);
+  });
 
-    // Get user input for title, message, and subtext
-    const title = titleInput.value.trim() || 'Title'; // Default to 'Title' if empty
-    const message = messageInput.value.trim() || 'Message'; // Default to 'Message' if empty
-    const subText = subTextInput.value.trim() || 'Subtext'; // Default to 'Subtext' if empty
+  // Get user input for title, message, and subtext
+  const title = titleInput.value.trim() 
+  const message = messageInput.value.trim() 
+  const subText = subTextInput.value.trim() 
 
-    // Set text properties for the title, message, and subtext
-    const titleFontSize = 24; // Title font size
-    const messageFontSize = 18; // Message font size
-    const subTextFontSize = 14; // Subtext font size
+  // Set text properties for the title, message, and subtext
+  const titleFontSize = 24; // Title font size
+  const messageFontSize = 18; // Message font size
+  const subTextFontSize = 14; // Subtext font size
 
-    // Set font and alignment for title, message, and subtext
-    ctx.fillStyle = textColor; // Set the fill color to theme color
-    ctx.textAlign = 'right'; // Align text to the right for title, message, subtext
-    ctx.textBaseline = 'top'; // Align text to the top
+  // Set font and alignment for title, message, and subtext
+  ctx.fillStyle = textColor; // Set the fill color to theme color
+  ctx.textAlign = alignmentOption; // Set alignment
+  ctx.textBaseline = 'top'; // Align text to the top
 
-    // Position for text at the top-right corner
-    const margin = 20; // Margin from the edges
-    const titleX = canvas.width - margin;
-    const titleY = margin;
+  // Position for text at the top based on alignment
+  const margin = 20; // Margin from the edges
+  let titleX;
+  if (alignmentOption === 'left') {
+    titleX = margin;
+  } else if (alignmentOption === 'center') {
+    titleX = canvas.width / 2;
+  } else { // default to 'right'
+    titleX = canvas.width - margin;
+  }
+  const titleY = margin;
 
-    // Draw the title at the top-right
-    ctx.font = `bold ${titleFontSize}px Arial`; // Title font
-    ctx.fillText(title, titleX, titleY);
+  // Draw the title with selected font style and family
+  ctx.font = `${fontStyleOption} ${titleFontSize}px ${fontFamilyOption}`;
+  ctx.fillText(title, titleX, titleY);
 
-    // Draw the message below the title
-    ctx.font = `${messageFontSize}px Arial`; // Message font
-    const messageY = titleY + titleFontSize + 10; // Position message below title
-    ctx.fillText(message, titleX, messageY);
+  // Draw the message below the title
+  ctx.font = `${fontStyleOption} ${messageFontSize}px ${fontFamilyOption}`;
+  const messageY = titleY + titleFontSize + 10; // Position message below title
+  ctx.fillText(message, titleX, messageY);
 
-    // Draw the subtext below the message
-    ctx.font = `${subTextFontSize}px Arial`; // Subtext font
-    const subTextY = messageY + messageFontSize + 10; // Position subtext below message
-    ctx.fillText(subText, titleX, subTextY);
+  // Draw the subtext below the message
+  ctx.font = `${fontStyleOption} ${subTextFontSize}px ${fontFamilyOption}`;
+  const subTextY = messageY + messageFontSize + 10; // Position subtext below message
+  ctx.fillText(subText, titleX, subTextY);
 }
 
 
