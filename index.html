@@ -234,7 +234,6 @@
                   <label for="fontStyleOption" class="dropdown-text text-gray-600 mr-3">Font Style:</label>
                   <select id="fontStyleOption" class="border p-2 rounded-lg text-gray-700" onchange="updateFontStyleOption(this.value)">
                     <option value="normal">Normal</option>
-                    <option value="bold">Bold</option>
                     <option value="italic">Italic</option>
                   </select>
                 </div>
@@ -369,7 +368,7 @@
 
     <script>
 
-      mapboxgl.accessToken = 'pk.eyJ1IjoidGFsaGF3YXFxYXMxNCIsImEiOiJjbHBreHhscWEwMWU4MnFyenU3ODdmeTdsIn0.8IlEgMNGcbx806t363hDJg';
+      mapboxgl.accessToken = 'pk.eyJ1Ijoic3RvcnlvcCIsImEiOiJjbTMwNzVwZXEwbGlsMmxzamp2d2l3ZTFmIn0.4Z_RR1VXQVZyvFHEb_jsMw';
           let mapContainer = document.getElementById('mapContainer');
           let mapElement = document.getElementById('map');
           let previewContainer = document.getElementById('previewContainer');
@@ -378,7 +377,7 @@
       const map = new mapboxgl.Map({
       container: 'map',
   
-      style: 'mapbox://styles/talhawaqqas14/cm1s96dl200yw01qvet4c70x3',
+      style: 'mapbox://styles/storyop/cm307fkwg009i01qtd7rkg9hr',
       zoom: 1.2,
       center: [-145, 30],
       preserveDrawingBuffer: true,
@@ -593,14 +592,14 @@ addLocation();
 
     // Update map style based on the selected theme
     const styles = {
-        blue: 'mapbox://styles/talhawaqqas14/cm1s96dl200yw01qvet4c70x3',
-        green: 'mapbox://styles/talhawaqqas14/cm2cph1pv00ts01peb9h22o6p',
-        red: 'mapbox://styles/talhawaqqas14/cm2csq97700uz01pbepp64hmd',
-        yellow: 'mapbox://styles/talhawaqqas14/cm2cs1cku00pf01pic3sq8nsq',
-        purple: 'mapbox://styles/talhawaqqas14/cm2csdiwr00yn01qvcx8d3nrc',
-        orange: 'mapbox://styles/talhawaqqas14/cm2csmkhm00ux01pbfkol7618',
-        pink: 'mapbox://styles/talhawaqqas14/clv3x1c2t00f601qp5mzd3npx',
-        gray: 'mapbox://styles/talhawaqqas14/cm2axer5n00p101pge4b9f4mz'
+        blue: 'mapbox://styles/storyop/cm307fkwg009i01qtd7rkg9hr',
+        green: 'mapbox://styles/storyop/cm307et22009o01qz9h1rg977',
+        red: 'mapbox://styles/storyop/cm307c1cz00gu01pq3rt22tn4',
+        yellow: 'mapbox://styles/storyop/cm307ecg2009h01qt6hc3f6au',
+        purple: 'mapbox://styles/storyop/cm307e0pr00to01pigtnu8stc',
+        orange: 'mmapbox://styles/storyop/cm307djwq00vb01o0bwk6d513',
+        pink: 'mapbox://styles/storyop/cm307fwkc00vc01o0amqu3sb0',
+        gray: 'mapbox://styles/storyop/cm307f1p8009p01qzekqe7w8i'
     };
 
     if (styles[theme]) {
