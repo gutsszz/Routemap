@@ -4,13 +4,60 @@
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Travel Route Planner</title>
+      <!-- Preloading Fonts -->
+<link rel="preload" href="fonts/KunstlerScript.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="fonts/Rockwell.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="fonts/Magneto.ttf" as="font" type="font/ttf" crossorigin="anonymous">
+<link rel="preload" href="fonts/AerioViasBrasilNF.ttf" as="font" type="font/ttf" crossorigin="anonymous">
+<link rel="preload" href="fonts/Cormier.woff" as="font" type="font/woff" crossorigin="anonymous">
+<link rel="preload" href="fonts/HausSans.ttf" as="font" type="font/ttf" crossorigin="anonymous">
+<link rel="preload" href="fonts/MagnoliaScript.ttf" as="font" type="font/ttf" crossorigin="anonymous">
+<link rel="preload" href="https://fonts.gstatic.com/s/permanentmarker/v17/P5KthI5Vtf12l1pT7xxve3BneZ-VFrA.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://fonts.gstatic.com/s/oswald/v36/TK3iWkQp9Llu9ZG1t1xMyb3s9zI9uvA.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://fonts.gstatic.com/s/yellowtail/v19/uhkQqYwZec2GTwdz0uWq.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://fonts.gstatic.com/s/bangers/v15/j1c5lzS3JZAfJXa1p4s0klmd7DoWLq8.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://fonts.gstatic.com/s/fugazone/v10/1Ptgd_wjtnR08LnxBOo0sWcZ_J6_gf8.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://fonts.gstatic.com/s/racingsansone/v16/sspE7fFTn28q70PEx61uKq0sKvXT4Vs.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://fonts.gstatic.com/s/parisienne/v11/4L6eJPRBTHaX-FY70dYbqY9xUEDm5Ew.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+<link rel="preload" href="https://fonts.gstatic.com/s/dancingscript/v14/rr67JgShvtn6lR6Jw5yK7OhG1BpwK9w.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
       <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400&display=swap" rel="stylesheet">
       <link href="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Oswald:wght@400;700&family=Yellowtail&family=Bangers&family=Fugaz+One&family=Racing+Sans+One&family=Parisienne&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
       
       <script src="https://cdn.tailwindcss.com"></script>
       <style>
+
+@font-face {
+        font-family: 'Kunstler Script';
+        src: url('fonts/KunstlerScript.woff2') format('woff2');
+    }
+    @font-face {
+        font-family: 'Rockwell';
+        src: url('fonts/Rockwell.woff2') format('woff2');
+    }
+    @font-face {
+        font-family: 'Magneto';
+        src: url('fonts/Magneto.ttf') format('truetype');
+    }
+    @font-face {
+        font-family: 'Aerio Vias Brasil NF';
+        src: url('fonts/AerioViasBrasilNF.ttf') format('truetype');
+    }
+    @font-face {
+        font-family: 'Cormier';
+        src: url('fonts/Cormier.woff') format('woff');
+    }
+    @font-face {
+        font-family: 'Haus Sans';
+        src: url('fonts/HausSans.ttf') format('truetype');
+    }
+    @font-face {
+        font-family: 'Magnolia Script';
+        src: url('fonts/MagnoliaScript.ttf') format('truetype');
+    }
         .transition-transform {
           transition: transform 0.3s ease;
         }
@@ -118,10 +165,20 @@
                  
                 </div>
                 <!-- Add button below inputs -->
-                <div class="flex justify-center space-x-4 my-6">
-                  <button onclick="addLocation()" class="bg-[#cca385] text-white px-6 py-1 rounded w-full">Add</button>
-                  <button onclick="calculateRoute()" class="bg-[#cca385] text-white px-6 py-1 rounded w-full">Route</button>
-                </div>
+                <div class="flex flex-col space-y-4 my-6">
+                  <!-- Add and Clear All Buttons -->
+                  <div class="flex justify-center space-x-4">
+                      <button onclick="addLocation()" class="bg-[#cca385] text-white px-6 py-1 rounded w-full">Add</button>
+                      <button onclick="clearAll()" class="bg-[#cca385] text-white px-6 py-1 rounded w-full">Clear All</button>
+                  </div>
+              
+                  <!-- Route Button -->
+                  <div class="flex justify-center">
+                      <button onclick="calculateRoute()" class="bg-[#cca385] text-white px-6 py-1 rounded w-full">Route</button>
+                  </div>
+                  
+              </div>
+              
                 
               </div>
             </div>
@@ -238,15 +295,38 @@
                   </select>
                 </div>
                 
-                <!-- Font Family Option Dropdown -->
-                <div class="flex items-center mt-4 mb-3">
-                  <label for="fontFamilyOption" class="dropdown-text text-gray-600 mr-3">Font Family:</label>
-                  <select id="fontFamilyOption" class="border p-2 rounded-lg text-gray-700" onchange="updateFontFamilyOption(this.value)">
-                    <option value="Arial">Arial</option>
-                    <option value="Times New Roman">Times New Roman</option>
-                    <option value="Courier New">Courier New</option>
-                  </select>
-                </div>
+<!-- Font Family Option Dropdown -->
+<div class="flex flex-col sm:flex-row items-start sm:items-center mt-4 mb-3">
+  <label for="fontFamilyOption" class="dropdown-text text-gray-600 mb-2 sm:mb-0 sm:mr-3">Font Family:</label>
+  <div class="relative w-full sm:w-auto">
+    <select id="fontFamilyOption" 
+            class="border p-2 rounded-lg text-gray-700 w-full sm:w-auto max-h-40 overflow-y-auto focus:outline-none focus:ring-2 focus:ring-blue-500" 
+            onchange="updateFontFamilyOption(this.value)">
+      <!-- Alphabetically Sorted Options -->
+      <option value="Aerio Vias Brasil NF">Aerio Vias Brasil NF</option>
+      <option value="Arial">Arial</option>
+      <option value="Bangers">Bangers</option>
+      <option value="Cormier">Cormier</option>
+      <option value="Courier New">Courier New</option>
+      <option value="Dancing Script">Dancing Script</option>
+      <option value="Fugaz One">Fugaz One</option>
+      <option value="Haus Sans">Haus Sans</option>
+      <option value="Helvetica">Helvetica</option>
+      <option value="Kunstler Script">Kunstler Script</option>
+      <option value="Magneto">Magneto</option>
+      <option value="Magnolia Script">Magnolia Script</option>
+      <option value="Oswald">Oswald</option>
+      <option value="Parisienne">Parisienne</option>
+      <option value="Permanent Marker">Permanent Marker</option>
+      <option value="Racing Sans One">Racing Sans One</option>
+      <option value="Rockwell">Rockwell</option>
+      <option value="Tahoma">Tahoma</option>
+      <option value="Times New Roman">Times New Roman</option>
+      <option value="Verdana">Verdana</option>
+      <option value="Yellowtail">Yellowtail</option>
+    </select>
+  </div>
+</div>
             
                 <!-- Existing Text Color Picker and Hide Text Switch -->
                 <div class="w-full flex items-center justify-between mt-4 mb-3">
@@ -525,17 +605,50 @@ let printsize = "size24x18";
         map.removeSource('route');
     }
 
-    // Recalculate the route only if there are enough remaining points
-    const remainingCoordinates = Array.from(document.querySelectorAll('#locationsContainer > div'))
-        .filter(row => row.dataset.lat && row.dataset.lng);
+    // Remove any straight lines that were added (tracked in the straightLineLayers array)
+    straightLineLayers.forEach(layerId => {
+        if (map.getSource(layerId)) {
+            map.removeLayer(layerId);
+            map.removeSource(layerId);
+        }
+    });
 
-    if (remainingCoordinates.length >= 2) {
-        calculateRoute();
-    }
+    // Clear the straight line layers array after removal
+    straightLineLayers = [];
+
+    // Recalculate the route only if there are enough remaining points
+    // const remainingCoordinates = Array.from(document.querySelectorAll('#locationsContainer > div'))
+    //     .filter(row => row.dataset.lat && row.dataset.lng);
+
+    // if (remainingCoordinates.length >= 2) {
+    //     calculateRoute();
+    // }
 
     // Update the canvas text after location removal
     updateCityNames();
 }
+// Helper function to get pairs of consecutive locations
+function getLocationPairs() {
+    const coordinates = [];
+    document.querySelectorAll('#locationsContainer > div').forEach(location => {
+        const lat = location.dataset.lat;
+        const lng = location.dataset.lng;
+        if (lat && lng) {
+            coordinates.push([parseFloat(lng), parseFloat(lat)]);
+        }
+    });
+
+    const pairs = [];
+    for (let i = 0; i < coordinates.length - 1; i++) {
+        pairs.push([coordinates[i], coordinates[i + 1]]);
+    }
+
+    return pairs;
+}
+
+
+
+
 
 // Function to update indexes after adding/removing locations
 function updateIndexes() {
@@ -578,17 +691,75 @@ function updateIndexes() {
 
 addLocation();
 
-  let currentRouteData = null; // To store route data
 
-  function selectTheme(theme) {
-    
-    if(theme==selectedTheme){return};
+
+
+function clearAll() {
+    // Clear markers
+    if (markers.length > 0) {
+        markers.forEach(marker => marker.remove()); // Remove all markers from the map
+        markers = []; // Reset the markers array
+    }
+
+    // Clear locations in the UI
+    const locationsContainer = document.getElementById('locationsContainer');
+    locationsContainer.innerHTML = ''; // Clear all location inputs
+
+    // Reset GeoJSON data
+    geojsonData.features = [];
+
+    // Update the markers GeoJSON source if it exists
+    if (map.getSource('markers')) {
+        map.getSource('markers').setData(geojsonData);
+    }
+
+    // Clear the route layer and source
+    if (map.getSource('route')) {
+        map.removeLayer('route');
+        map.removeSource('route');
+    }
+
+    // Clear all straight-line layers
+    straightLineLayers.forEach(layerId => {
+        if (map.getSource(layerId)) {
+            map.removeLayer(layerId);
+            map.removeSource(layerId);
+        }
+    });
+    straightLineLayers = []; // Reset the straight-line layers array
+
+    // Reset any other related UI components or state
+    updateCityNames(); // Update canvas text (if applicable)
+     map.resize(); // Refresh map rendering
+     addLocation();
+  }
+
+
+
+
+
+
+
+let currentRouteData = null; // To store route data
+let currentStraightLines = []; // To store straight line data
+
+function selectTheme(theme) {
+    if (theme == selectedTheme) return;
     selectedTheme = theme; // Update the global theme selection
-    
-    // Save the current route data (if it exists) before changing the theme
+
+    // Save the current route and straight lines data (if they exist) before changing the theme
     if (map.getSource('route')) {
         currentRouteData = map.getSource('route')._data; // Save the current route GeoJSON data
     }
+    currentStraightLines = straightLineLayers.map(layerId => {
+        if (map.getSource(layerId)) {
+            return {
+                id: layerId,
+                data: map.getSource(layerId)._data
+            };
+        }
+        return null;
+    }).filter(Boolean); // Remove any null values (in case a source was removed)
 
     // Update map style based on the selected theme
     const styles = {
@@ -597,7 +768,7 @@ addLocation();
         red: 'mapbox://styles/storyop/cm307c1cz00gu01pq3rt22tn4',
         yellow: 'mapbox://styles/storyop/cm307ecg2009h01qt6hc3f6au',
         purple: 'mapbox://styles/storyop/cm307e0pr00to01pigtnu8stc',
-        orange: 'mmapbox://styles/storyop/cm307djwq00vb01o0bwk6d513',
+        orange: 'mapbox://styles/storyop/cm307djwq00vb01o0bwk6d513',
         pink: 'mapbox://styles/storyop/cm307fwkc00vc01o0amqu3sb0',
         gray: 'mapbox://styles/storyop/cm307f1p8009p01qzekqe7w8i'
     };
@@ -629,6 +800,28 @@ addLocation();
             });
         }
 
+        // Re-add the straight lines (failed segments) to the map
+        currentStraightLines.forEach(line => {
+            map.addSource(line.id, {
+                type: 'geojson',
+                data: line.data
+            });
+
+            map.addLayer({
+                id: line.id,
+                type: 'line',
+                source: line.id,
+                layout: {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                paint: {
+                    'line-color': routeColors[selectedTheme], // Same color as the route
+                    'line-width': 4
+                }
+            });
+        });
+
         // Re-add the circle layer to display the markers
         if (!map.getSource('markers')) {
             map.addSource('markers', {
@@ -651,7 +844,9 @@ addLocation();
             });
         }
     });
-    drawCityNamesOnCanvas();
+
+    displaytext ();
+
     // Update UI: Remove selected class from all containers
     const containers = document.querySelectorAll('.theme-container');
     containers.forEach(container => {
@@ -662,8 +857,6 @@ addLocation();
     const selectedContainer = document.querySelector(`.theme-container[onclick*="${theme}"]`);
     selectedContainer.classList.add('border-[#cca385]', 'border-4');
 }
-
-
 
   function performGeocoding(query) {
     if (!query) {
@@ -852,54 +1045,97 @@ map.on('mouseleave', 'circle-markers', function () {
     map.getCanvas().style.cursor = '';
 });
 
-  function calculateRoute() {
+function calculateRoute() {
     const coordinates = [];
     document.querySelectorAll('#locationsContainer > div').forEach(location => {
-      const lat = location.dataset.lat;
-      const lng = location.dataset.lng;
-      if (lat && lng) {
-        coordinates.push([lng, lat]); // Coordinates are stored as [lng, lat]
-      }
+        const lat = location.dataset.lat;
+        const lng = location.dataset.lng;
+        if (lat && lng) {
+            coordinates.push([parseFloat(lng), parseFloat(lat)]); // Coordinates are stored as [lng, lat]
+        }
     });
-  
+
     if (coordinates.length < 2) {
-      alert("Please enter at least two valid locations.");
-      return;
+        alert("Please enter at least two valid locations.");
+        return;
     }
-  
-    const query = coordinates.map(c => `${c[0]},${c[1]}`).join(';');
-    const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${query}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
-  
-    fetch(url)
-      .then(response => response.json())
-      .then(data => {
-        const route = data.routes[0].geometry;
-        displayRouteOnMap(route);
-      })
-      .catch(error => {
-        console.error('Error fetching route:', error);
-        alert("Unable to calculate the route. Please try again.");
-      });
-  }
-  
-  function displayRouteOnMap(route) {
-    // Remove the existing route layer and source if it exists
+
+    // Initialize arrays to hold the route data
+    const fullRoute = [];
+    const failedSegments = [];
+
+    // Function to fetch route for a pair of coordinates (start and end)
+    function fetchRouteForSegment(start, end, callback) {
+        const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${start[0]},${start[1]};${end[0]},${end[1]}?geometries=geojson&access_token=${mapboxgl.accessToken}`;
+        
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data.routes && data.routes.length > 0) {
+                    // If a route is found, add it to the full route
+                    callback(data.routes[0].geometry);
+                } else {
+                    // If no route is found, add the pair of points to the failed segments (straight line)
+                    failedSegments.push([start, end]);
+                    callback(null);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching route:', error);
+                callback(null);
+            });
+    }
+
+    // Function to process all segments (consecutive locations)
+    function processSegments(index) {
+        if (index >= coordinates.length - 1) {
+            // Once all segments are processed, display the entire route (with straight lines where necessary)
+            displayRouteOnMap(fullRoute, failedSegments);
+            return;
+        }
+
+        const start = coordinates[index];
+        const end = coordinates[index + 1];
+
+        // Fetch route for the current segment
+        fetchRouteForSegment(start, end, function(route) {
+            if (route) {
+                // If route is available, add the route coordinates to fullRoute
+                fullRoute.push(route.coordinates);
+            }
+            // Move on to the next segment (pair of locations)
+            processSegments(index + 1);
+        });
+    }
+
+    // Start processing from the first segment
+    processSegments(0);
+}
+
+let straightLineLayers = []; // Array to keep track of straight line layer IDs
+
+function displayRouteOnMap(route, failedSegments) {
+    // First, remove any existing route layer and source if they exist
     if (map.getSource('route')) {
         map.removeLayer('route');
         map.removeSource('route');
     }
 
-    // Add the new route source
+    // Create a GeoJSON object for the valid route segments (land routes)
+    const routeGeoJSON = {
+        type: 'Feature',
+        geometry: {
+            type: 'LineString',
+            coordinates: [].concat(...route)  // Flatten the array of coordinates
+        }
+    };
+
+    // Add the valid route (land route) to the map
     map.addSource('route', {
         type: 'geojson',
-        data: {
-            type: 'Feature',
-            properties: {},
-            geometry: route
-        }
+        data: routeGeoJSON
     });
 
-    // Add the route layer
     map.addLayer({
         id: 'route',
         type: 'line',
@@ -912,13 +1148,60 @@ map.on('mouseleave', 'circle-markers', function () {
             'line-color': routeColors[selectedTheme], // Dynamic route color based on theme
             'line-width': 4
         }
-    }, 'circle-markers'); // Add the route layer below the markers layer
+    }, 'circle-markers'); // Add route below the markers layer using 'circle-markers'
 
-    // Fit the map bounds to the route
-    const bounds = new mapboxgl.LngLatBounds();
-    route.coordinates.forEach(coord => {
-        bounds.extend(coord);
+    // Now, let's handle failed segments (straight lines between points)
+    failedSegments.forEach(([start, end]) => {
+        // Create a GeoJSON object for the straight line segment
+        const lineGeoJSON = {
+            type: 'Feature',
+            geometry: {
+                type: 'LineString',
+                coordinates: [start, end]
+            }
+        };
+
+        // Create a unique ID for the straight line layer
+        const straightLineId = `straight-line-${start[0]}-${start[1]}-${end[0]}-${end[1]}`;
+
+        // Add the straight line segment to the map, treating it like a regular route
+        map.addSource(straightLineId, {
+            type: 'geojson',
+            data: lineGeoJSON
+        });
+
+        map.addLayer({
+            id: straightLineId,
+            type: 'line',
+            source: straightLineId,
+            layout: {
+                'line-join': 'round',
+                'line-cap': 'round'
+            },
+            paint: {
+                'line-color': routeColors[selectedTheme], // Same color as regular routes
+                'line-width': 4
+            }
+        }, 'circle-markers'); // Add straight line below markers as well
+
+        // Track the layer ID for future removal
+        straightLineLayers.push(straightLineId);
     });
+
+    // Fit the map bounds to include the entire route (land + straight lines)
+    const bounds = new mapboxgl.LngLatBounds();
+    route.forEach(segment => {
+        segment.forEach(coord => {
+            bounds.extend(coord);
+        });
+    });
+
+    failedSegments.forEach(([start, end]) => {
+        bounds.extend(start);
+        bounds.extend(end);
+    });
+
+    // Fit the map bounds with padding
     map.fitBounds(bounds, { padding: 50 });
 }
 
@@ -936,7 +1219,7 @@ function resizeCanvas() {
 
     // Redraw the city names whenever the canvas size changes
     if (displayCityNames) {
-        drawCityNamesOnCanvas();
+        displaytext ();
     }
 }
 
@@ -1037,29 +1320,29 @@ const subTextInput = document.getElementById('subTextInput');
 
 
 // Event listeners to update the canvas as the user types
-titleInput.addEventListener('input', drawCityNamesOnCanvas);
-messageInput.addEventListener('input', drawCityNamesOnCanvas);
-subTextInput.addEventListener('input', drawCityNamesOnCanvas);
+titleInput.addEventListener('input', displaytext );
+messageInput.addEventListener('input', displaytext );
+subTextInput.addEventListener('input', displaytext );
 
 
 
 // Functions to update each option based on user input
 function updateAlignmentOption(value) {
   alignmentOption = value;
-  drawCityNamesOnCanvas(); // Redraw to apply changes
+  displaytext (); // Redraw to apply changes
 }
 
 function updateFontStyleOption(value) {
   fontStyleOption = value;
-  drawCityNamesOnCanvas(); // Redraw to apply changes
+  displaytext (); // Redraw to apply changes
 }
 
 function updateFontFamilyOption(value) {
   fontFamilyOption = value;
-  drawCityNamesOnCanvas(); // Redraw to apply changes
+  displaytext (); // Redraw to apply changes
 }
 
-function drawCityNamesOnCanvas(textColor = themeColors[selectedTheme]) {
+function displaytext (textColor = themeColors[selectedTheme]) {
   printtextcolor = textColor;
 
   if (displayCityNames == false) return;
@@ -1118,7 +1401,7 @@ function drawCityNamesOnCanvas(textColor = themeColors[selectedTheme]) {
   const titleY = margin;
 
   // Draw the title with selected font style and family
-  ctx.font = `${fontStyleOption} ${titleFontSize}px ${fontFamilyOption}`;
+  ctx.font = `${fontStyleOption} bold ${titleFontSize}px ${fontFamilyOption}`;
   ctx.fillText(title, titleX, titleY);
 
   // Draw the message below the title
@@ -1135,7 +1418,7 @@ function drawCityNamesOnCanvas(textColor = themeColors[selectedTheme]) {
 
 // Function to update city names on canvas when input changes
 function updateCityNames() {
-    drawCityNamesOnCanvas(); // Directly call the drawing function
+    displaytext (); // Directly call the drawing function
 }
 
 
@@ -1145,7 +1428,7 @@ function updateCityNames() {
 document.getElementById('toggleCityNames').addEventListener('click', () => {
     displayCityNames = !displayCityNames;
     if (displayCityNames) {
-        drawCityNamesOnCanvas(); // Redraw city names if they're being displayed
+        displaytext (); // Redraw city names if they're being displayed
     } else {
         ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas if not displaying
     }
@@ -1165,12 +1448,23 @@ function updateWaterColor(color) {
     map.setPaintProperty(waterLayerId, 'fill-color', color);
 }
 
-function updateRouteColor(color){
-  map.setPaintProperty('route', 'line-color', color);
+function updateRouteColor(color) {
+    // Update the color for the main route
+    if (map.getLayer('route')) {
+        map.setPaintProperty('route', 'line-color', color);
+    }
+
+    // Update the color for all straight-line segments
+    straightLineLayers.forEach(layerId => {
+        if (map.getLayer(layerId)) {
+            map.setPaintProperty(layerId, 'line-color', color);
+        }
+    });
 }
 
+
 function updateTextColor(color){
-drawCityNamesOnCanvas(color);
+displaytext (color);
 }
 function updateMarkerColor(color){
   map.setPaintProperty('circle-markers', 'circle-stroke-color', color);
