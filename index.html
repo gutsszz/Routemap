@@ -12,14 +12,6 @@
 <link rel="preload" href="fonts/Cormier.woff" as="font" type="font/woff" crossorigin="anonymous">
 <link rel="preload" href="fonts/HausSans.ttf" as="font" type="font/ttf" crossorigin="anonymous">
 <link rel="preload" href="fonts/MagnoliaScript.ttf" as="font" type="font/ttf" crossorigin="anonymous">
-<link rel="preload" href="https://fonts.gstatic.com/s/permanentmarker/v17/P5KthI5Vtf12l1pT7xxve3BneZ-VFrA.woff2" as="font" type="font/woff2" crossorigin="anonymous">
-<link rel="preload" href="https://fonts.gstatic.com/s/oswald/v36/TK3iWkQp9Llu9ZG1t1xMyb3s9zI9uvA.woff2" as="font" type="font/woff2" crossorigin="anonymous">
-<link rel="preload" href="https://fonts.gstatic.com/s/yellowtail/v19/uhkQqYwZec2GTwdz0uWq.woff2" as="font" type="font/woff2" crossorigin="anonymous">
-<link rel="preload" href="https://fonts.gstatic.com/s/bangers/v15/j1c5lzS3JZAfJXa1p4s0klmd7DoWLq8.woff2" as="font" type="font/woff2" crossorigin="anonymous">
-<link rel="preload" href="https://fonts.gstatic.com/s/fugazone/v10/1Ptgd_wjtnR08LnxBOo0sWcZ_J6_gf8.woff2" as="font" type="font/woff2" crossorigin="anonymous">
-<link rel="preload" href="https://fonts.gstatic.com/s/racingsansone/v16/sspE7fFTn28q70PEx61uKq0sKvXT4Vs.woff2" as="font" type="font/woff2" crossorigin="anonymous">
-<link rel="preload" href="https://fonts.gstatic.com/s/parisienne/v11/4L6eJPRBTHaX-FY70dYbqY9xUEDm5Ew.woff2" as="font" type="font/woff2" crossorigin="anonymous">
-<link rel="preload" href="https://fonts.gstatic.com/s/dancingscript/v14/rr67JgShvtn6lR6Jw5yK7OhG1BpwK9w.woff2" as="font" type="font/woff2" crossorigin="anonymous">
 
       <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400&display=swap" rel="stylesheet">
       <link href="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css" rel="stylesheet">
@@ -96,30 +88,55 @@
 
 
 
-      /* Media query for smaller screens */
-      @media (max-width: 768px) {
-          /* Make sidebar cover the entire screen */
-          #sidebar {
-            width: 100%;
-            height: 100%;
-            z-index: 10;
-          }
+     /* Mobile styles */
+@media (max-width: 768px) {
+  /* Center preview container */
+  #previewContainer {
+    display: block;
+    width: 90vw;
+    height: 70vw;
+    top: 50%;
+    left: 5%;
+    z-index: 10;
+  }
 
-          /* Hide large map and show preview on top of sidebar */
-          #mapWrapper {
-            display: none;
-          }
+  #previewMap {
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
 
-          #previewContainer {
-            display: block;
-            width: 80vw;
-            height: 60vw;
-            top: 70%;
-            left: 15%;
-            right: 5%;
-            z-index: 50;
-          }
-        }
+  #mapCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  #mapWrapper {
+    display: none;
+  }
+
+  #sidebar {
+    height: 100%;
+    overflow-y: auto;
+    width: 100%;
+    
+  }
+
+  #previewContainer {
+  touch-action: none; /* Disable touch gestures while dragging */
+  cursor: grab;
+}
+
+#previewContainer.dragging {
+  cursor: grabbing;
+}
+
+}
+
       </style>
     </head>
     <body class="bg-gray-100">
@@ -370,50 +387,64 @@
                 </svg>
                 Size
               </button>
-            
               <div id="dropdown4" class="hidden pl-4 mt-2">
-             
+
+                <!-- Orientation Switch -->
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-gray-600">Orientation:</span>
+                    <button id="orientationButton" 
+                            class="w-32 h-10 bg-gray-200 border rounded-lg flex items-center justify-center hover:bg-gray-300 focus:bg-gray-300 focus:outline-none" 
+                            onclick="switchOrientation()">
+                        Landscape
+                    </button>
+                </div>
+            
                 <!-- Size Selection Boxes -->
                 <div class="mt-4 flex space-x-4" id="sizeSelector">
-                  <button 
-                    class="w-24 h-16 bg-gray-200 border rounded-lg flex items-center justify-center hover:bg-gray-300 focus:bg-gray-300 focus:outline-none" 
-                    onclick="setSize('size24x18', this)">
-                    24x18
-                  </button>
-                  <button 
-                    class="w-24 h-16 bg-gray-200 border rounded-lg flex items-center justify-center hover:bg-gray-300 focus:bg-gray-300 focus:outline-none" 
-                    onclick="setSize('size18x12', this)">
-                    18x12
-                  </button>
+                    <button 
+                        class="w-24 h-16 bg-gray-200 border rounded-lg flex items-center justify-center hover:bg-gray-300 focus:bg-gray-300 focus:outline-none" 
+                        onclick="setSize('size24x18', this)">
+                        24x18
+                    </button>
+                    <button 
+                        class="w-24 h-16 bg-gray-200 border rounded-lg flex items-center justify-center hover:bg-gray-300 focus:bg-gray-300 focus:outline-none" 
+                        onclick="setSize('size18x12', this)">
+                        18x12
+                    </button>
+                    <button 
+                        class="w-24 h-16 bg-gray-200 border rounded-lg flex items-center justify-center hover:bg-gray-300 focus:bg-gray-300 focus:outline-none" 
+                        onclick="setSize('size8_5x11', this)">
+                        11x8.5
+                    </button>
                 </div>
-                
+            
                 <!-- Hidden inputs to store values -->
                 <input type="hidden" id="selectedSize" value="size24x18"> <!-- Default value -->
             
                 <!-- Hidden Inputs for DPI, Width, Height -->
                 <div class="hidden">
-                  <label for="widthInput">Width (inches):</label>
-                  <input type="number" id="widthInput" value="8" step="0.1">
-                  <label for="heightInput">Height (inches):</label>
-                  <input type="number" id="heightInput" value="6" step="0.1">
-                  <label for="dpiInput">DPI:</label>
-                  <input type="number" id="dpiInput" value="300">
+                    <label for="widthInput">Width (inches):</label>
+                    <input type="number" id="widthInput" value="8" step="0.1">
+                    <label for="heightInput">Height (inches):</label>
+                    <input type="number" id="heightInput" value="6" step="0.1">
+                    <label for="dpiInput">DPI:</label>
+                    <input type="number" id="dpiInput" value="300">
                 </div>
             
                 <!-- Output Format Dropdown -->
                 <div class="mt-4">
-                  <label for="outputOptions" class="block text-gray-600">Output format:</label>
-                  <select id="outputOptions" class="p-2 border rounded w-full focus:outline-none">
-                    <option value="png">PNG</option>
-                    <option value="pdf">PDF</option>
-                  </select>
+                    <label for="outputOptions" class="block text-gray-600">Output format:</label>
+                    <select id="outputOptions" class="p-2 border rounded w-full focus:outline-none">
+                        <option value="png">PNG</option>
+                        <option value="pdf">PDF</option>
+                    </select>
                 </div>
                 <div class="flex justify-center space-x-4 my-6">
-                  <button id="generate-btn" class="bg-[#cca385] text-white px-6 py-1 rounded w-full"> Print</button>
+                    <button id="generate-btn" class="bg-[#cca385] text-white px-6 py-1 rounded w-full">Print</button>
                 </div>
-                 
-               
-              </div>
+            
+            </div>
+            
             </div>
             
 
@@ -432,21 +463,36 @@
         </div>
         
         
-    <!-- Preview Container for smaller screens -->
-    <div id="previewContainer" class="hidden bg-white fixed p-4 shadow-xl" style="z-index: 50;">
-      <!-- Semi-transparent background -->
-      <div class="absolute inset-0 bg-white opacity-80"></div>
-      
-      <!-- Map content above the background -->
-      <div id="previewMap" class="relative flex items-center justify-center w-full h-full text-gray-500">
-        
-      </div>
-    </div>
-
-    </div>
-      
+        <div id="previewContainer" class="hidden bg-white fixed p-4 shadow-xl" style="z-index: 50;">
+          <!-- Semi-transparent background -->
+          <div class="absolute inset-0 bg-white opacity-80"></div>
+          
+          <!-- Map content above the background -->
+          <div id="previewMap" class="relative flex items-center justify-center w-full h-full text-gray-500">
+            <!-- Content here -->
+          </div>
+        </div>
+            
 
     <script>
+
+
+
+const toggleSidebar = document.getElementById('toggleSidebar');
+    const sidebar = document.getElementById('sidebar');
+
+    toggleSidebar.addEventListener('click', () => {
+      sidebar.classList.toggle('-translate-x-full');
+    });
+
+    // Function to toggle dropdowns
+    function toggleDropdown(dropdownId, button) {
+      const dropdown = document.getElementById(dropdownId);
+      const arrow = button.querySelector('.arrow');
+      dropdown.classList.toggle('hidden');
+      arrow.classList.toggle('arrow-down');
+    }
+
 
       mapboxgl.accessToken = 'pk.eyJ1Ijoic3RvcnlvcCIsImEiOiJjbTMwNzVwZXEwbGlsMmxzamp2d2l3ZTFmIn0.4Z_RR1VXQVZyvFHEb_jsMw';
           let mapContainer = document.getElementById('mapContainer');
@@ -467,27 +513,94 @@
   
   
       function moveMapToPreview() {
-            if (window.innerWidth <= 768) {
-              // Move map to preview container
-              if (!previewMapElement.contains(mapElement)) {
-                previewMapElement.appendChild(mapElement);
-                map.resize(); // Ensure the map resizes correctly in the smaller container
-              }
-            } else {
-              // Move map back to the main container
-              if (!mapContainer.contains(mapElement)) {
-                mapContainer.appendChild(mapElement);
-                map.resize(); // Resize map back in the larger container
-              }
-            }
-          }
+    if (window.innerWidth <= 768) {
+        // Move map and canvas to preview container
+        if (!previewMapElement.contains(mapElement)) {
+            previewMapElement.appendChild(mapElement);
+            const canvas = document.getElementById('mapCanvas');
+            previewContainer.appendChild(canvas); // Attach canvas to preview
+            map.resize(); // Resize map for smaller container
+        }
+    } else {
+        // Move map and canvas back to the main container
+        if (!mapContainer.contains(mapElement)) {
+            mapContainer.appendChild(mapElement);
+            const canvas = document.getElementById('mapCanvas');
+            mapContainer.appendChild(canvas); // Attach canvas back to main map container
+            map.resize(); // Resize map for larger container
+        }
+    }
+}
+
   
           // Call the function initially
           moveMapToPreview();
   
           // Adjust on window resize
           window.addEventListener('resize', moveMapToPreview);
-  
+          let isDragging = false;
+let offsetX, offsetY;
+
+
+// Mouse/touch down event
+previewContainer.addEventListener('mousedown', startDrag);
+previewContainer.addEventListener('touchstart', startDrag, { passive: false });
+
+// Mouse/touch move event
+document.addEventListener('mousemove', drag);
+document.addEventListener('touchmove', drag, { passive: false });
+
+// Mouse/touch up event
+document.addEventListener('mouseup', stopDrag);
+document.addEventListener('touchend', stopDrag);
+
+function startDrag(event) {
+  isDragging = true;
+  previewContainer.classList.add('dragging');
+
+  // Calculate offset
+  const rect = previewContainer.getBoundingClientRect();
+  if (event.type === 'mousedown') {
+    offsetX = event.clientX - rect.left;
+    offsetY = event.clientY - rect.top;
+  } else if (event.type === 'touchstart') {
+    const touch = event.touches[0];
+    offsetX = touch.clientX - rect.left;
+    offsetY = touch.clientY - rect.top;
+  }
+}
+
+function drag(event) {
+  if (!isDragging) return;
+
+  // Prevent default scrolling behavior
+  event.preventDefault();
+
+  let clientX, clientY;
+
+  if (event.type === 'mousemove') {
+    clientX = event.clientX;
+    clientY = event.clientY;
+  } else if (event.type === 'touchmove') {
+    const touch = event.touches[0];
+    clientX = touch.clientX;
+    clientY = touch.clientY;
+  }
+
+  // Calculate new position
+  const newX = clientX - offsetX;
+  const newY = clientY - offsetY;
+
+  // Move the container
+  previewContainer.style.left = `${newX}px`;
+  previewContainer.style.top = `${newY}px`;
+}
+
+function stopDrag() {
+  isDragging = false;
+  previewContainer.classList.remove('dragging');
+}
+
   
         
          // Function to toggle dropdowns
@@ -532,15 +645,18 @@ document.addEventListener('DOMContentLoaded', setDefaultValues);
 
 
 let selectedSizeButton = null; // Variable to keep track of the selected button
-let printsize = "size24x18";
+let printsize = "size24x18";   // Default print size
+let orientation = "landscape"; // Default orientation
 
-  function setSize(size, button) {
-    // Update the hidden input with the selected size value (size24x18 or size18x12)
+// Function to handle size selection
+function setSize(size, button) {
+    // Update the hidden input with the selected size value (e.g., size24x18 or size18x12)
     document.getElementById('selectedSize').value = size;
-    printsize=size;
+    printsize = size;
+
     // If a button was already selected, remove the special border class
     if (selectedSizeButton) {
-      selectedSizeButton.classList.remove('border-[#cca385]', 'border-4');
+        selectedSizeButton.classList.remove('border-[#cca385]', 'border-4');
     }
 
     // Add the special border to the newly selected button
@@ -548,7 +664,40 @@ let printsize = "size24x18";
 
     // Keep track of the selected button
     selectedSizeButton = button;
-  }
+}
+
+// Function to switch orientation
+function switchOrientation() {
+    // Toggle orientation value
+    orientation = orientation === "landscape" ? "portrait" : "landscape";
+
+    // Update the orientation button text
+    document.getElementById("orientationButton").innerText = 
+        orientation.charAt(0).toUpperCase() + orientation.slice(1);
+
+    // Update size button labels dynamically
+    const sizeSelector = document.getElementById("sizeSelector").children;
+    for (let button of sizeSelector) {
+        // Parse the current button's dimensions
+        const dimensions = button.innerText.split("x");
+        if (dimensions.length === 2) {
+            const width = dimensions[0];
+            const height = dimensions[1];
+
+            // Swap dimensions based on the current orientation
+            button.innerText = orientation === "landscape" ? `${Math.max(width, height)}x${Math.min(width, height)}` : `${Math.min(width, height)}x${Math.max(width, height)}`;
+        }
+    }
+
+    // Adjust the hidden inputs for width and height dynamically
+    const widthInput = document.getElementById("widthInput");
+    const heightInput = document.getElementById("heightInput");
+
+    // Swap values based on orientation
+    const temp = widthInput.value;
+    widthInput.value = heightInput.value;
+    heightInput.value = temp;
+}
 
 
   function removeLocation(element) {
@@ -1243,7 +1392,7 @@ function printtext(ctx, canvasWidth, canvasHeight) {
 
     // Get all location input fields
     const locationRows = document.querySelectorAll('#locationsContainer > div');
-    const textColor = printtextcolor; // Get color based on selected theme
+    const textColor = printtextcolor; 
 
     // Scaling factors based on the original dimensions (7200x5400)
     const widthScale = canvasWidth / 7200;
@@ -1254,7 +1403,10 @@ function printtext(ctx, canvasWidth, canvasHeight) {
     const lineHeight = 180 * heightScale; // Adjust line height relative to canvas height
 
     ctx.fillStyle = textColor; // Set text color
-    ctx.font = `${fontSize}px Arial`; // Keep font fixed for city names
+const fontStyle = fontStyleOption || 'normal'; // Use global font style option
+    const fontFamily = fontFamilyOption || 'Arial'; // Use global font family option
+
+    ctx.font = `${fontStyle} ${fontSize}px ${fontFamily}    `; // Keep font fixed for city names
     ctx.textAlign = 'left'; // Fix alignment to the left for city names
     ctx.textBaseline = 'alphabetic'; // Standard text baseline for city names
 
@@ -1281,9 +1433,6 @@ function printtext(ctx, canvasWidth, canvasHeight) {
     const messageFontSize = 180 * heightScale;
     const subTextFontSize = 140 * heightScale;
 
-    // Set font, style, and alignment for title, message, and subtext
-    const fontStyle = fontStyleOption || 'normal'; // Use global font style option
-    const fontFamily = fontFamilyOption || 'Arial'; // Use global font family option
     const alignment = alignmentOption || 'right'; // Use global alignment option (default to right)
 
     ctx.fillStyle = textColor; // Set the fill color to theme color
@@ -1484,26 +1633,38 @@ function generateMap() {
 
 
         if (format === 'pdf') {
-      if (printsize === 'size24x18') {
+    if (printsize === 'size24x18') {
         width = 4.32;
         height = 3.24;
-      } else if (printsize === 'size18x12') {
+    } else if (printsize === 'size18x12') {
         width = 3.24;
         height = 2.24;
-      }
-    } else if (format === 'png') { map.setPaintProperty('circle-markers', 'circle-radius', 20);
-        map.setPaintProperty('circle-markers', 'circle-stroke-width',5);
-        map.setPaintProperty('route', 'line-width', 9);
-      if (printsize === 'size24x18') {
-        width = 8;
-        height = 6;
-      } else if (printsize === 'size18x12') {
-        width = 6;
-        height = 4;
-      }
+    } else if (printsize === 'size8_5x11') { // New size for PDF
+        width = 1.53;  // Width in inches
+        height = 1.98; // Height in inches
     }
+} else if (format === 'png') {
+    map.setPaintProperty('circle-markers', 'circle-radius', 20);
+    map.setPaintProperty('circle-markers', 'circle-stroke-width', 5);
+    map.setPaintProperty('route', 'line-width', 9);
+
+    if (printsize === 'size24x18') {
+        width = 8; // Width in inches
+        height = 6; // Height in inches
+    } else if (printsize === 'size18x12') {
+        width = 6; // Width in inches
+        height = 4; // Height in inches
+    } else if (printsize === 'size8_5x11') { // New size for PNG
+        width = 3.667;  // Width in inches
+        height = 2.839;  // Height in inches
+    }
+}
 
 
+if (orientation === 'portrait') {
+        // Swap width and height for portrait mode
+        [width, height] = [height, width];
+    }
 
         if (width <= 0 || height <= 0 || dpi <= 0) {
             alert("Width, height, and DPI must be positive numbers!");
