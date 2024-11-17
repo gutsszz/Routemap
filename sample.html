@@ -87,7 +87,6 @@
     }
 
 
-
      /* Mobile styles */
 @media (max-width: 768px) {
   /* Center preview container */
@@ -507,7 +506,7 @@
             <canvas id="mapCanvas" class="absolute top-0 left-0 w-full h-full" style="pointer-events: none;"></canvas>
           </div>
         </div>
-        <div id="previewContainer" class=" hidden bg-white fixed p-4 shadow-xl border" style="z-index: 50;">
+        <div id="previewContainer" class="bg-white fixed p-4 shadow-xl border" style="z-index: 50;">
           <button id="minimizePreview" onclick="togglePreviewContainer()">−</button>
           <!-- Semi-transparent background -->
           <div class="absolute inset-0 bg-white opacity-80"></div>
@@ -668,7 +667,6 @@ let isPreviewVisible = true;
 function togglePreviewContainer() {
   const previewContainer = document.getElementById('previewContainer');
   const previewButton = document.getElementById('previewToggleButton');
-  if (window.innerWidth <= 768) {
 
   if (isPreviewVisible) {
     // Hide the preview container and show the toggle button
@@ -681,9 +679,6 @@ function togglePreviewContainer() {
     previewButton.style.display = 'none';
     isPreviewVisible = true;
   }
-}else { previewContainer.style.display = 'none';
-previewButton.style.display = 'none'}
-
 }
 
 
