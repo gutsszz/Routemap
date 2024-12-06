@@ -1679,77 +1679,87 @@ function updateMarkerColor(color){
 }
 
 document.getElementById('generate-btn').addEventListener('click', generateMap);
-
 function generateMap() {
-        'use strict';
-       
+    'use strict';
 
-        // Get user-defined values for width, height, and DPI
-        let width = Number(document.getElementById('widthInput').value);  // User input for width
-        let height = Number(document.getElementById('heightInput').value);  // User input for height
-        const dpi = Number(document.getElementById('dpiInput').value);  // User input for DPI
-        const format = document.getElementById('outputOptions').value === 'png' ? 'png' : 'pdf';  // Output format
+    // Get user-defined values for width, height, and DPI
+    let width = Number(document.getElementById('widthInput').value);  // User input for width
+    let height = Number(document.getElementById('heightInput').value);  // User input for height
+    const dpi = Number(document.getElementById('dpiInput').value);  // User input for DPI
+    const format = document.getElementById('outputOptions').value === 'png' ? 'png' : 'pdf';  // Output format
 
-
-        if (format === 'pdf') {
-    if (printsize === 'size24x18') {
-        width = 4.32;
-        height = 3.24;
-    } else if (printsize === 'size18x12') {
-        width = 3.24;
-        height = 2.24;
-    } else if (printsize === 'size8_5x11') { // New size for PDF
-        width = 1.98;  // Width in inches
-        height = 1.53; // Height in inches
+    if (format === 'pdf') {
+        if (printsize === 'size24x18') {
+            width = 4.32;
+            height = 3.24;
+            map.setPaintProperty('circle-markers', 'circle-radius', 6);
+            map.setPaintProperty('circle-markers', 'circle-stroke-width', 2);
+            map.setPaintProperty('route', 'line-width', 4);
+        } else if (printsize === 'size18x12') {
+            width = 3.24;
+            height = 2.24;
+            map.setPaintProperty('circle-markers', 'circle-radius', 4);
+            map.setPaintProperty('circle-markers', 'circle-stroke-width', 1.5);
+            map.setPaintProperty('route', 'line-width', 3);
+        } else if (printsize === 'size8_5x11') { // New size for PDF
+            width = 1.98;  // Width in inches
+            height = 1.53; // Height in inches
+            map.setPaintProperty('circle-markers', 'circle-radius', 3);
+            map.setPaintProperty('circle-markers', 'circle-stroke-width', 1);
+            map.setPaintProperty('route', 'line-width', 2);
+        }
+    } else if (format === 'png') {
+        if (printsize === 'size24x18') {
+            width = 8; // Width in inches
+            height = 6; // Height in inches
+            map.setPaintProperty('circle-markers', 'circle-radius', 20);
+            map.setPaintProperty('circle-markers', 'circle-stroke-width', 5);
+            map.setPaintProperty('route', 'line-width', 9);
+        } else if (printsize === 'size18x12') {
+            width = 6; // Width in inches
+            height = 4; // Height in inches
+            map.setPaintProperty('circle-markers', 'circle-radius', 15);
+            map.setPaintProperty('circle-markers', 'circle-stroke-width', 4);
+            map.setPaintProperty('route', 'line-width', 7);
+        } else if (printsize === 'size8_5x11') { // New size for PNG
+            width = 3.667;  // Width in inches
+            height = 2.839;  // Height in inches
+            map.setPaintProperty('circle-markers', 'circle-radius', 10);
+            map.setPaintProperty('circle-markers', 'circle-stroke-width', 2.5);
+            map.setPaintProperty('route', 'line-width', 5);
+        }
     }
-} else if (format === 'png') {
-    map.setPaintProperty('circle-markers', 'circle-radius', 20);
-    map.setPaintProperty('circle-markers', 'circle-stroke-width', 5);
-    map.setPaintProperty('route', 'line-width', 9);
 
-    if (printsize === 'size24x18') {
-        width = 8; // Width in inches
-        height = 6; // Height in inches
-    } else if (printsize === 'size18x12') {
-        width = 6; // Width in inches
-        height = 4; // Height in inches
-    } else if (printsize === 'size8_5x11') { // New size for PNG
-        width = 3.667;  // Width in inches
-        height = 2.839;  // Height in inches
-    }
-}
-
-
-if (orientation === 'portrait') {
+    if (orientation === 'portrait') {
         // Swap width and height for portrait mode
         [width, height] = [height, width];
     }
 
-        if (width <= 0 || height <= 0 || dpi <= 0) {
-            alert("Width, height, and DPI must be positive numbers!");
-            return;
-        }
-
-        // Calculate the required pixel dimensions based on DPI
-        const pixelWidth = width * dpi;
-        const pixelHeight = height * dpi;
-
-        
-        // Get current map state
-        const zoom = map.getZoom();
-        const center = map.getCenter();
-        const bearing = map.getBearing();
-        const pitch = map.getPitch();
-        const style = map.getStyle();
-
-
-        map.setPaintProperty('circle-markers', 'circle-radius', 6);
-        map.setPaintProperty('circle-markers', 'circle-stroke-width', 2);
-        map.setPaintProperty('route', 'line-width', 4);
-
-        // Create the high-resolution map
-        createPrintMap(pixelWidth, pixelHeight, dpi, format, zoom, center, bearing, pitch, style);
+    if (width <= 0 || height <= 0 || dpi <= 0) {
+        alert("Width, height, and DPI must be positive numbers!");
+        return;
     }
+
+    // Calculate the required pixel dimensions based on DPI
+    const pixelWidth = width * dpi;
+    const pixelHeight = height * dpi;
+
+    // Get current map state
+    const zoom = map.getZoom();
+    const center = map.getCenter();
+    const bearing = map.getBearing();
+    const pitch = map.getPitch();
+    const style = map.getStyle();
+
+    // Reset to optimal size for display after adjustments
+    map.setPaintProperty('circle-markers', 'circle-radius', 6);
+    map.setPaintProperty('circle-markers', 'circle-stroke-width', 2);
+    map.setPaintProperty('route', 'line-width', 4);
+
+    // Create the high-resolution map
+    createPrintMap(pixelWidth, pixelHeight, dpi, format, zoom, center, bearing, pitch, style);
+}
+
     function createPrintMap(pixelWidth, pixelHeight, dpi, format, zoom, center, bearing, pitch, style) {
     'use strict';
 
