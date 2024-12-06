@@ -185,7 +185,7 @@
 
       </style>
     </head>
-    <body class="bg-gray-100">
+    <body class="bg-gray-200">
 
       <!-- Top Bar -->
       <div class="w-full bg-white h-16 flex items-center justify-between px-4 shadow-lg z-10 fixed top-0">
@@ -1348,25 +1348,40 @@ function calculateRoute() {
 let straightLineLayers = []; // Array to keep track of straight line layer IDs
 
 function displayRouteOnMap(route, failedSegments) {
-    // First, remove any existing route layer and source if they exist
+    // Remove any existing route layers and sources
     if (map.getSource('route')) {
         map.removeLayer('route');
         map.removeSource('route');
     }
 
-    // Create a GeoJSON object for the valid route segments (land routes)
-    const routeGeoJSON = {
+    // Create a GeoJSON FeatureCollection for all segments
+    const routeFeatures = route.map(segment => ({
         type: 'Feature',
         geometry: {
             type: 'LineString',
-            coordinates: [].concat(...route)  // Flatten the array of coordinates
+            coordinates: segment
         }
+    }));
+
+    // Create a GeoJSON FeatureCollection for all failed segments
+    const failedFeatures = failedSegments.map(([start, end]) => ({
+        type: 'Feature',
+        geometry: {
+            type: 'LineString',
+            coordinates: [start, end]
+        }
+    }));
+
+    // Combine route and failed segments into a single FeatureCollection
+    const allFeatures = {
+        type: 'FeatureCollection',
+        features: [...routeFeatures, ...failedFeatures]
     };
 
-    // Add the valid route (land route) to the map
+    // Add the combined GeoJSON to the map
     map.addSource('route', {
         type: 'geojson',
-        data: routeGeoJSON
+        data: allFeatures
     });
 
     map.addLayer({
@@ -1378,55 +1393,15 @@ function displayRouteOnMap(route, failedSegments) {
             'line-cap': 'round'
         },
         paint: {
-            'line-color': routeColors[selectedTheme], // Dynamic route color based on theme
+            'line-color': routeColors[selectedTheme], // Use your color scheme
             'line-width': 4
         }
-    }, 'circle-markers'); // Add route below the markers layer using 'circle-markers'
+    }, 'circle-markers'); // Add the layer below the markers
 
-    // Now, let's handle failed segments (straight lines between points)
-    failedSegments.forEach(([start, end]) => {
-        // Create a GeoJSON object for the straight line segment
-        const lineGeoJSON = {
-            type: 'Feature',
-            geometry: {
-                type: 'LineString',
-                coordinates: [start, end]
-            }
-        };
-
-        // Create a unique ID for the straight line layer
-        const straightLineId = `straight-line-${start[0]}-${start[1]}-${end[0]}-${end[1]}`;
-
-        // Add the straight line segment to the map, treating it like a regular route
-        map.addSource(straightLineId, {
-            type: 'geojson',
-            data: lineGeoJSON
-        });
-
-        map.addLayer({
-            id: straightLineId,
-            type: 'line',
-            source: straightLineId,
-            layout: {
-                'line-join': 'round',
-                'line-cap': 'round'
-            },
-            paint: {
-                'line-color': routeColors[selectedTheme], // Same color as regular routes
-                'line-width': 4
-            }
-        }, 'circle-markers'); // Add straight line below markers as well
-
-        // Track the layer ID for future removal
-        straightLineLayers.push(straightLineId);
-    });
-
-    // Fit the map bounds to include the entire route (land + straight lines)
+    // Fit map bounds to include all segments
     const bounds = new mapboxgl.LngLatBounds();
     route.forEach(segment => {
-        segment.forEach(coord => {
-            bounds.extend(coord);
-        });
+        segment.forEach(coord => bounds.extend(coord));
     });
 
     failedSegments.forEach(([start, end]) => {
@@ -1434,9 +1409,9 @@ function displayRouteOnMap(route, failedSegments) {
         bounds.extend(end);
     });
 
-    // Fit the map bounds with padding
     map.fitBounds(bounds, { padding: 50 });
 }
+
 
 // Get the canvas element and context
 const canvas = document.getElementById('mapCanvas');
