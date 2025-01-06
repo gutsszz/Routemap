@@ -433,35 +433,40 @@
                 </svg>
                 Size
               </button>
-              <div id="dropdown4" class="hidden pl-4 mt-2">
-
+              <div id="dropdown4" class="hidden pl-4 mt-4 max-h-80 overflow-y-auto">
+            
                 <!-- Orientation Switch -->
                 <div class="flex items-center justify-between mb-4">
-                    <span class="text-gray-600">Orientation:</span>
-                    <button id="orientationButton" 
-                            class="w-32 h-10 bg-gray-200 border rounded-lg flex items-center justify-center hover:bg-gray-300 focus:bg-gray-300 focus:outline-none" 
-                            onclick="switchOrientation()">
-                        Landscape
-                    </button>
+                  <span class="text-gray-600 font-medium">Orientation:</span>
+                  <button id="orientationButton" 
+                          class="w-28 h-8 bg-gray-200 border rounded-lg flex items-center justify-center hover:bg-gray-300 focus:bg-gray-300 focus:outline-none text-sm" 
+                          onclick="switchOrientation()">
+                    Landscape
+                  </button>
                 </div>
             
                 <!-- Size Selection Boxes -->
-                <div class="mt-4 flex space-x-4" id="sizeSelector">
-                    <button 
-                        class="w-24 h-16 bg-gray-200 border rounded-lg flex items-center justify-center hover:bg-gray-300 focus:bg-gray-300 focus:outline-none" 
-                        onclick="setSize('size24x18', this)">
-                        24x18
-                    </button>
-                    <button 
-                        class="w-24 h-16 bg-gray-200 border rounded-lg flex items-center justify-center hover:bg-gray-300 focus:bg-gray-300 focus:outline-none" 
-                        onclick="setSize('size18x12', this)">
-                        18x12
-                    </button>
-                    <button 
-                        class="w-24 h-16 bg-gray-200 border rounded-lg flex items-center justify-center hover:bg-gray-300 focus:bg-gray-300 focus:outline-none" 
-                        onclick="setSize('size8_5x11', this)">
-                        11x8.5
-                    </button>
+                <div class="mt-4 grid grid-cols-2 gap-4">
+                  <button 
+                      class="w-full h-12 bg-gray-200 border rounded-lg flex items-center justify-center hover:bg-gray-300 focus:bg-gray-300 focus:outline-none text-sm" 
+                      onclick="setSize('size24x18', this)">
+                    24x18
+                  </button>
+                  <button 
+                      class="w-full h-12 bg-gray-200 border rounded-lg flex items-center justify-center hover:bg-gray-300 focus:bg-gray-300 focus:outline-none text-sm" 
+                      onclick="setSize('size18x12', this)">
+                    18x12
+                  </button>
+                  <button 
+                      class="w-full h-12 bg-gray-200 border rounded-lg flex items-center justify-center hover:bg-gray-300 focus:bg-gray-300 focus:outline-none text-sm" 
+                      onclick="setSize('size8_5x11', this)">
+                    11x8.5
+                  </button>
+                  <button 
+                      class="w-full h-12 bg-gray-200 border rounded-lg flex items-center justify-center hover:bg-gray-300 focus:bg-gray-300 focus:outline-none text-sm" 
+                      onclick="setSize('size6x4', this)">
+                    6x4
+                  </button>
                 </div>
             
                 <!-- Hidden inputs to store values -->
@@ -469,29 +474,31 @@
             
                 <!-- Hidden Inputs for DPI, Width, Height -->
                 <div class="hidden">
-                    <label for="widthInput">Width (inches):</label>
-                    <input type="number" id="widthInput" value="8" step="0.1">
-                    <label for="heightInput">Height (inches):</label>
-                    <input type="number" id="heightInput" value="6" step="0.1">
-                    <label for="dpiInput">DPI:</label>
-                    <input type="number" id="dpiInput" value="300">
+                  <label for="widthInput">Width (inches):</label>
+                  <input type="number" id="widthInput" value="8" step="0.1">
+                  <label for="heightInput">Height (inches):</label>
+                  <input type="number" id="heightInput" value="6" step="0.1">
+                  <label for="dpiInput">DPI:</label>
+                  <input type="number" id="dpiInput" value="300">
                 </div>
             
                 <!-- Output Format Dropdown -->
                 <div class="mt-4">
-                    <label for="outputOptions" class="block text-gray-600">Output format:</label>
-                    <select id="outputOptions" class="p-2 border rounded w-full focus:outline-none">
-                        <option value="png">PNG</option>
-                        <option value="pdf">PDF</option>
-                    </select>
-                </div>
-                <div class="flex justify-center space-x-4 my-6">
-                    <button id="generate-btn" class="bg-[#cca385] text-white px-6 py-1 rounded w-full">Print</button>
+                  <label for="outputOptions" class="block text-gray-600 font-medium">Output format:</label>
+                  <select id="outputOptions" class="p-1 border rounded w-full text-sm focus:outline-none">
+                    <option value="png">PNG</option>
+                    <option value="pdf">PDF</option>
+                  </select>
                 </div>
             
-            </div>
+                <!-- Print Button -->
+                <div class="flex justify-center mt-4">
+                  <button id="generate-btn" class="bg-[#cca385] text-white px-4 py-1 rounded text-sm font-medium">Print</button>
+                </div>
             
+              </div>
             </div>
+                        
             
 
 
@@ -1701,12 +1708,18 @@ function generateMap() {
             map.setPaintProperty('circle-markers', 'circle-radius', 4);
             map.setPaintProperty('circle-markers', 'circle-stroke-width', 1.5);
             map.setPaintProperty('route', 'line-width', 3);
-        } else if (printsize === 'size8_5x11') { // New size for PDF
-            width = 1.98;  // Width in inches
-            height = 1.53; // Height in inches
+        } else if (printsize === 'size8_5x11') {
+            width = 1.98;
+            height = 1.53;
             map.setPaintProperty('circle-markers', 'circle-radius', 3);
             map.setPaintProperty('circle-markers', 'circle-stroke-width', 1);
             map.setPaintProperty('route', 'line-width', 2);
+        } else if (printsize === 'size6x4') { // New size for PDF
+            width = 1.08;
+            height = 0.72;
+            map.setPaintProperty('circle-markers', 'circle-radius', 2.5);
+            map.setPaintProperty('circle-markers', 'circle-stroke-width', 0.8);
+            map.setPaintProperty('route', 'line-width', 1.5);
         }
     } else if (format === 'png') {
         if (printsize === 'size24x18') {
@@ -1721,12 +1734,18 @@ function generateMap() {
             map.setPaintProperty('circle-markers', 'circle-radius', 15);
             map.setPaintProperty('circle-markers', 'circle-stroke-width', 4);
             map.setPaintProperty('route', 'line-width', 7);
-        } else if (printsize === 'size8_5x11') { // New size for PNG
+        } else if (printsize === 'size8_5x11') {
             width = 3.667;  // Width in inches
             height = 2.839;  // Height in inches
             map.setPaintProperty('circle-markers', 'circle-radius', 10);
             map.setPaintProperty('circle-markers', 'circle-stroke-width', 2.5);
             map.setPaintProperty('route', 'line-width', 5);
+        } else if (printsize === 'size6x4') { // New size for PNG
+            width = 2;  // Width in inches
+            height = 1.3339;  // Height in inches
+            map.setPaintProperty('circle-markers', 'circle-radius', 7);
+            map.setPaintProperty('circle-markers', 'circle-stroke-width', 1.8);
+            map.setPaintProperty('route', 'line-width', 3);
         }
     }
 
@@ -1760,7 +1779,7 @@ function generateMap() {
     createPrintMap(pixelWidth, pixelHeight, dpi, format, zoom, center, bearing, pitch, style);
 }
 
-    function createPrintMap(pixelWidth, pixelHeight, dpi, format, zoom, center, bearing, pitch, style) {
+function createPrintMap(pixelWidth, pixelHeight, dpi, format, zoom, center, bearing, pitch, style) {
     'use strict';
 
     // Adjust the devicePixelRatio for high-resolution rendering
@@ -1808,9 +1827,6 @@ function generateMap() {
 
     // Wait until the map finishes loading before exporting
     printMap.once('load', function () {
-    
-            
-
         const hiddenCtx = hiddenCanvas.getContext('2d');
 
         // Get the original canvas
@@ -1819,9 +1835,8 @@ function generateMap() {
         // Draw the original canvas onto the hidden canvas
         hiddenCtx.drawImage(originalCanvas, 0, 0);
 
-
         // Optional: If you have text to print on the map
-        printtext(hiddenCtx,hiddenCanvas.width,hiddenCanvas.height);
+        printtext(hiddenCtx, hiddenCanvas.width, hiddenCanvas.height);
 
         if (format === 'png') {
             hiddenCanvas.toBlob(function (blob) {
@@ -1837,7 +1852,7 @@ function generateMap() {
                 document.body.removeChild(hiddenMapContainer);
                 Object.defineProperty(window, 'devicePixelRatio', { get: function () { return actualPixelRatio; } });
             });
-        } else {console.log(pixelWidth + " H " +pixelHeight);
+        } else {
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF({
                 orientation: pixelWidth > pixelHeight ? 'l' : 'p',
@@ -1853,7 +1868,7 @@ function generateMap() {
             document.body.removeChild(hiddenMapContainer);
             Object.defineProperty(window, 'devicePixelRatio', { get: function () { return actualPixelRatio; } });
         }
-       
+
         printMap.remove();
         map.resize();
     });
