@@ -90,9 +90,17 @@
       background: #b59c74; /* Darker shade on hover */
     }
 
+/* Make the Pickr popup smaller */
+.pcr-app {
+  transform: scale(0.85); /* Scale down to 80% of the original size */
+}
+
 
 /* Target the Pickr button */
 .pickr .pcr-button {
+
+  width: 14px !important; /* Adjust width */
+  height: 14px !important; /* Adjust height */
   border: 1px solid black !important; /* Add a black border */
   border-radius: 4px; /* Optional: Add rounded corners */
 }
@@ -1671,6 +1679,10 @@ const landColorPicker = Pickr.create({
     preview: true,
     opacity: true,
     hue: true,
+    interaction: {
+            input: true,  // Enables manual input field
+           
+        }
   }
 });
 
@@ -1686,6 +1698,10 @@ const textColorPicker = Pickr.create({
     preview: true,
     opacity: true,
     hue: true,
+    interaction: {
+            input: true,  // Enables manual input field
+           
+        }
   }
 });
 
@@ -1700,6 +1716,10 @@ const waterColorPicker = Pickr.create({
     preview: true,
     opacity: true,
     hue: true,
+    interaction: {
+            input: true,  // Enables manual input field
+           
+        }
   }
 });
 
@@ -1713,6 +1733,10 @@ const routeColorPicker = Pickr.create({
     preview: true,
     opacity: true,
     hue: true,
+    interaction: {
+            input: true,  // Enables manual input field
+           
+        }
   }
 });
 
@@ -1726,6 +1750,10 @@ const markerColorPicker = Pickr.create({
     preview: true,
     opacity: true,
     hue: true,
+    interaction: {
+            input: true,  // Enables manual input field
+           
+        }
   }
 });
 
