@@ -11,15 +11,19 @@
 <link rel="preload" href="fonts/AerioViasBrasilNF.ttf" as="font" type="font/ttf" crossorigin="anonymous">
 <link rel="preload" href="fonts/Cormier.woff" as="font" type="font/woff" crossorigin="anonymous">
 <link rel="preload" href="fonts/HausSans.ttf" as="font" type="font/ttf" crossorigin="anonymous">
-<link rel="preload" href="fonts/MagnoliaScript.ttf" as="font" type="font/ttf" crossorigin="anonymous">
+<link rel="preload" href="fonts/MagnoliaScript.ttf" as="font" type="font/ttf" crossorigin="anonymous"><!-- Pickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/classic.min.css">
+
+
 
       <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400&display=swap" rel="stylesheet">
       <link href="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css" rel="stylesheet">
       <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Oswald:wght@400;700&family=Yellowtail&family=Bangers&family=Fugaz+One&family=Racing+Sans+One&family=Parisienne&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-      
       <script src="https://cdn.tailwindcss.com"></script>
+      <!-- Pickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
       <style>
 
 @font-face {
@@ -87,7 +91,11 @@
     }
 
 
-
+/* Target the Pickr button */
+.pickr .pcr-button {
+  border: 1px solid black !important; /* Add a black border */
+  border-radius: 4px; /* Optional: Add rounded corners */
+}
      /* Mobile styles */
 @media (max-width: 768px) {
   /* Center preview container */
@@ -285,45 +293,43 @@
                 </div>
                 
                 
-                <!-- Color Options Section -->
-<div id="customThemeDropdown" class=" pl-4 mt-2">
-  <!-- Row 1 -->
-  <div class="flex space-x-4 mb-4">
-    <!-- Land Color -->
-    <div class="w-full">
-      <p class="dropdown-text text-gray-600">Land Color:</p>
-      <div class="flex mt-1">
-        <input type="color" id="landColor" class="w-8 h-8  border rounded" onchange="updateLandColor(this.value)">
-      </div>
-    </div>
-    <!-- Water Color -->
-    <div class="w-full">
-      <p class="dropdown-text text-gray-600">Water Color:</p>
-      <div class="flex mt-1">
-        <input type="color" id="waterColor" class="w-8 h-8  border rounded" onchange="updateWaterColor(this.value)">
-      </div>
-    </div>
-  </div>
-
-  <!-- Row 2 -->
-  <div class="flex space-x-4 mb-4">
-    <!-- Route Color -->
-    <div class="w-full">
-      <p class="dropdown-text text-gray-600">Route Color:</p>
-      <div class="flex mt-1">
-        <input type="color" id="routeColor" class="w-8 h-8  border rounded" onchange="updateRouteColor(this.value)">
-      </div>
-    </div>
-    <!-- Marker Color -->
-    <div class="w-full">
-      <p class="dropdown-text text-gray-600">Marker Color:</p>
-      <div class="flex mt-1">
-        <input type="color" id="markerColor" class="w-8 h-8  border rounded" onchange="updateMarkerColor(this.value)">
-      </div>
-    </div>
-  </div>
-</div>
-
+                <div id="customThemeDropdown" class="pl-4 mt-2">
+                  <!-- Row 1 -->
+                  <div class="flex space-x-4 mb-4">
+                    <!-- Land Color -->
+                    <div class="w-full">
+                      <p class="dropdown-text text-gray-600">Land Color:</p>
+                      <div class="flex mt-1">
+                        <div id="landColorPicker" class="w-8 h-8 border rounded"></div>
+                      </div>
+                    </div>
+                    <!-- Water Color -->
+                    <div class="w-full">
+                      <p class="dropdown-text text-gray-600">Water Color:</p>
+                      <div class="flex mt-1">
+                        <div id="waterColorPicker" class="w-8 h-8 border rounded"></div>
+                      </div>
+                    </div>
+                  </div>
+                
+                  <!-- Row 2 -->
+                  <div class="flex space-x-4 mb-4">
+                    <!-- Route Color -->
+                    <div class="w-full">
+                      <p class="dropdown-text text-gray-600">Route Color:</p>
+                      <div class="flex mt-1">
+                        <div id="routeColorPicker" class="w-8 h-8 border rounded"></div>
+                      </div>
+                    </div>
+                    <!-- Marker Color -->
+                    <div class="w-full">
+                      <p class="dropdown-text text-gray-600">Marker Color:</p>
+                      <div class="flex mt-1">
+                        <div id="markerColorPicker" class="w-8 h-8 border rounded"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
               </div>
             </div>
@@ -395,7 +401,7 @@
                 <div class="w-full flex items-center justify-between mt-4 mb-3">
                   <div class="flex items-center">
                     <p class="dropdown-text text-gray-600 mr-3">Text Color:</p>
-                    <input type="color" id="textColor" class="w-8 h-8 border rounded" onchange="updateTextColor(this.value)">
+                    <div id="textColorPicker" class="w-8 h-8 border rounded"></div>
                   </div>
                   <div class="flex items-center">
                     <label for="toggleCityNames" class="dropdown-text mr-3 text-gray-700">Hide Text</label>
@@ -1650,40 +1656,145 @@ document.getElementById('toggleCityNames').addEventListener('click', () => {
 });
 
 
+// Get current colors from the map
+const currentLandColor = map.getPaintProperty('land', 'background-color');
+const currentWaterColor = map.getPaintProperty('water', 'fill-color');
+const currentRouteColor = map.getPaintProperty('route', 'line-color');
+const currentMarkerColor = map.getPaintProperty('circle-markers', 'circle-stroke-color');
 
+// Initialize Pickr for each color picker
+const landColorPicker = Pickr.create({
+  el: '#landColorPicker',
+  theme: 'classic',
+  default: currentLandColor || 'rgba(255, 255, 255, 1)',
+  components: {
+    preview: true,
+    opacity: true,
+    hue: true,
+  }
+});
+
+landColorPicker.setColor(currentLandColor || 'rgba(255, 255, 255, 1)');
+
+
+
+const textColorPicker = Pickr.create({
+  el: '#textColorPicker',
+  theme: 'classic',
+  default: currentLandColor || 'rgba(255, 255, 255, 1)',
+  components: {
+    preview: true,
+    opacity: true,
+    hue: true,
+  }
+});
+
+textColorPicker.setColor(currentLandColor || 'rgba(255, 255, 255, 1)');
+
+
+const waterColorPicker = Pickr.create({
+  el: '#waterColorPicker',
+  theme: 'classic',
+  default: currentWaterColor || 'rgba(255, 255, 255, 1)',
+  components: {
+    preview: true,
+    opacity: true,
+    hue: true,
+  }
+});
+
+waterColorPicker.setColor(currentWaterColor || 'rgba(255, 255, 255, 1)');
+
+const routeColorPicker = Pickr.create({
+  el: '#routeColorPicker',
+  theme: 'classic',
+  default: currentRouteColor || 'rgba(255, 255, 255, 1)',
+  components: {
+    preview: true,
+    opacity: true,
+    hue: true,
+  }
+});
+
+routeColorPicker.setColor(currentRouteColor || 'rgba(255, 255, 255, 1)');
+
+const markerColorPicker = Pickr.create({
+  el: '#markerColorPicker',
+  theme: 'classic',
+  default: currentMarkerColor || 'rgba(255, 255, 255, 1)',
+  components: {
+    preview: true,
+    opacity: true,
+    hue: true,
+  }
+});
+
+markerColorPicker.setColor(currentMarkerColor || 'rgba(255, 255, 255, 1)');
+
+// Add event listeners to handle color changes
+landColorPicker.on('change', (color) => {
+  const rgbaColor = color.toRGBA().toString();
+  updateLandColor(rgbaColor);
+  landColorPicker.setColor(rgbaColor);
+});
+
+textColorPicker.on('change', (color) => {
+  const rgbaColor = color.toRGBA().toString();
+  updateTextColor(rgbaColor);
+  textColorPicker.setColor(rgbaColor);
+});
+
+waterColorPicker.on('change', (color) => {
+  const rgbaColor = color.toRGBA().toString();
+  updateWaterColor(rgbaColor);
+  waterColorPicker.setColor(rgbaColor);
+});
+
+routeColorPicker.on('change', (color) => {
+  const rgbaColor = color.toRGBA().toString();
+  updateRouteColor(rgbaColor);
+  routeColorPicker.setColor(rgbaColor);
+});
+
+markerColorPicker.on('change', (color) => {
+  const rgbaColor = color.toRGBA().toString();
+  updateMarkerColor(rgbaColor);
+  markerColorPicker.setColor(rgbaColor);
+});
+
+// Your existing functions
 function updateLandColor(color) {
-
-    const landLayerId = 'land';
-    map.setPaintProperty(landLayerId, 'background-color', color);
+  const landLayerId = 'land';
+  map.setPaintProperty(landLayerId, 'background-color', color);
 }
 
 function updateWaterColor(color) {
-
-    const waterLayerId = 'water'; // Adjust according to your layer ID
-    map.setPaintProperty(waterLayerId, 'fill-color', color);
+  const waterLayerId = 'water'; // Adjust according to your layer ID
+  map.setPaintProperty(waterLayerId, 'fill-color', color);
 }
 
 function updateRouteColor(color) {
-    // Update the color for the main route
-    if (map.getLayer('route')) {
-        map.setPaintProperty('route', 'line-color', color);
-    }
+  // Update the color for the main route
+  if (map.getLayer('route')) {
+    map.setPaintProperty('route', 'line-color', color);
+  }
 
-    // Update the color for all straight-line segments
-    straightLineLayers.forEach(layerId => {
-        if (map.getLayer(layerId)) {
-            map.setPaintProperty(layerId, 'line-color', color);
-        }
-    });
+  // Update the color for all straight-line segments
+  straightLineLayers.forEach(layerId => {
+    if (map.getLayer(layerId)) {
+      map.setPaintProperty(layerId, 'line-color', color);
+    }
+  });
 }
 
+function updateMarkerColor(color) {
+  map.setPaintProperty('circle-markers', 'circle-stroke-color', color);
+}
 
 function updateTextColor(color){
 displaytext (color);
 }
-function updateMarkerColor(color){
-  map.setPaintProperty('circle-markers', 'circle-stroke-color', color);
-}
+
 
 document.getElementById('generate-btn').addEventListener('click', generateMap);
 function generateMap() {
